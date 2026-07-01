@@ -1,0 +1,10 @@
+{
+  "rewrites": [
+    { "source": "/", "destination": "/wisdom-of-the-doctors.html" }
+  ],
+  "functions": {
+    "api/chat.js": {
+      "runtime": "nodejs20.x"
+    }
+  }
+}

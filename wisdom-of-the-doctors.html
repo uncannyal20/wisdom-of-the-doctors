@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wisdom of the Doctors</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1A1108;
+    --vellum: #F5E6C8;
+    --vellum-dim: #D4C4A0;
+    --gold: #C9A84C;
+    --gold-dim: #8B6A2E;
+    --walnut: #2A1D12;
+    --walnut-mid: #3D2B1F;
+    --earth: #6B3E26;
+    --earth-dim: #4A2B1A;
+    --parchment: #EDD9B0;
+    --text-muted: #A08060;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    background: var(--ink);
+    color: var(--vellum);
+    font-family: 'EB Garamond', Georgia, serif;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+
+  /* === HEADER === */
+  .app-header {
+    background: var(--walnut);
+    border-bottom: 1px solid var(--gold-dim);
+    padding: 0 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+    flex-shrink: 0;
+  }
+  .header-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .rose-window {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+  }
+  .rose-window.pulsing .petal { animation: rosepulse 2s ease-in-out infinite; }
+  .rose-window .petal { transform-origin: 18px 18px; }
+  @keyframes rosepulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+  }
+  .brand-text { line-height: 1.2; }
+  .brand-title {
+    font-family: 'Cinzel', serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--gold);
+    letter-spacing: 0.05em;
+  }
+  .brand-sub {
+    font-family: 'EB Garamond', serif;
+    font-size: 11px;
+    color: var(--text-muted);
+    font-style: italic;
+    letter-spacing: 0.02em;
+  }
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* === LAYOUT === */
+  .app-body {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  /* === SIDEBAR === */
+  .sidebar {
+    width: 220px;
+    flex-shrink: 0;
+    background: var(--walnut);
+    border-right: 1px solid var(--gold-dim);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .sidebar-section {
+    padding: 1rem;
+    border-bottom: 1px solid #3D2B1F;
+  }
+  .sidebar-label {
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    color: var(--gold-dim);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .doctor-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 7px 10px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    color: var(--vellum-dim);
+    font-family: 'EB Garamond', serif;
+    font-size: 13.5px;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.15s ease;
+    margin-bottom: 3px;
+  }
+  .doctor-btn:hover { background: var(--walnut-mid); border-color: var(--gold-dim); color: var(--vellum); }
+  .doctor-btn.active { background: var(--walnut-mid); border-color: var(--gold); color: var(--gold); }
+  .doctor-btn .doctor-icon {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    flex-shrink: 0;
+  }
+  .icon-sales { background: #3B2A1A; color: #C9A84C; }
+  .icon-aug { background: #2A1A2A; color: #A080C0; }
+  .icon-therese { background: #1A2A1A; color: #80C080; }
+  .icon-all { background: #1A2030; color: #80A0C0; }
+
+  .saved-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.75rem 1rem;
+  }
+  .saved-list::-webkit-scrollbar { width: 4px; }
+  .saved-list::-webkit-scrollbar-track { background: transparent; }
+  .saved-list::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 2px; }
+  .saved-label {
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    color: var(--gold-dim);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .saved-item {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-style: italic;
+    padding: 6px 8px;
+    border-left: 2px solid var(--gold-dim);
+    margin-bottom: 8px;
+    line-height: 1.4;
+    cursor: pointer;
+    transition: all 0.1s;
+    border-radius: 0 4px 4px 0;
+  }
+  .saved-item:hover { background: var(--walnut-mid); color: var(--vellum-dim); }
+  .saved-empty {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-style: italic;
+    opacity: 0.6;
+    line-height: 1.5;
+  }
+  .save-btn-small {
+    font-size: 11px;
+    color: var(--gold-dim);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 3px 6px;
+    border-radius: 3px;
+    font-family: 'Cinzel', serif;
+    letter-spacing: 0.05em;
+    transition: color 0.15s;
+  }
+  .save-btn-small:hover { color: var(--gold); }
+
+  /* === CHAT AREA === */
+  .chat-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-width: 0;
+  }
+  .chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .chat-messages::-webkit-scrollbar { width: 5px; }
+  .chat-messages::-webkit-scrollbar-track { background: transparent; }
+  .chat-messages::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 2px; }
+
+  /* Welcome screen */
+  .welcome-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 2rem;
+    text-align: center;
+  }
+  .welcome-rose { margin-bottom: 1.5rem; opacity: 0.8; }
+  .welcome-title {
+    font-family: 'Cinzel', serif;
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--gold);
+    letter-spacing: 0.05em;
+    margin-bottom: 0.75rem;
+  }
+  .welcome-quote {
+    font-size: 17px;
+    font-style: italic;
+    color: var(--vellum-dim);
+    max-width: 440px;
+    line-height: 1.7;
+    margin-bottom: 0.5rem;
+  }
+  .welcome-attr {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+  }
+  .prompt-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    max-width: 520px;
+  }
+  .chip {
+    background: var(--walnut-mid);
+    border: 1px solid var(--gold-dim);
+    color: var(--vellum-dim);
+    font-family: 'EB Garamond', serif;
+    font-size: 13px;
+    font-style: italic;
+    padding: 6px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .chip:hover { border-color: var(--gold); color: var(--vellum); background: var(--walnut); }
+
+  /* Messages */
+  .msg {
+    display: flex;
+    gap: 12px;
+    max-width: 680px;
+  }
+  .msg.user { align-self: flex-end; flex-direction: row-reverse; }
+  .msg-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    margin-top: 2px;
+  }
+  .avatar-ai { background: var(--walnut-mid); border: 1px solid var(--gold-dim); }
+  .avatar-user { background: var(--earth-dim); border: 1px solid var(--earth); }
+  .msg-bubble {
+    padding: 0.85rem 1.1rem;
+    border-radius: 2px 12px 12px 12px;
+    line-height: 1.75;
+    font-size: 15.5px;
+  }
+  .msg.user .msg-bubble {
+    background: var(--earth-dim);
+    border: 1px solid var(--earth);
+    border-radius: 12px 2px 12px 12px;
+    color: var(--parchment);
+  }
+  .msg.ai .msg-bubble {
+    background: var(--walnut-mid);
+    border: 1px solid #4D3B2F;
+    color: var(--vellum);
+  }
+  .msg-bubble p { margin-bottom: 0.75em; }
+  .msg-bubble p:last-child { margin-bottom: 0; }
+  .msg-bubble strong { color: var(--gold); font-weight: 500; }
+  .msg-bubble em { color: var(--vellum-dim); }
+  .msg-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 6px;
+    padding: 0 2px;
+  }
+  .msg-doctor-tag {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: var(--gold-dim);
+  }
+  .msg-save-btn {
+    font-size: 11px;
+    color: var(--text-muted);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-family: 'Cinzel', serif;
+    letter-spacing: 0.05em;
+    padding: 2px 6px;
+    transition: color 0.15s;
+  }
+  .msg-save-btn:hover { color: var(--gold); }
+  .msg-save-btn.saved { color: var(--gold); }
+
+  /* Citation block */
+  .citation-block {
+    margin-top: 0.85rem;
+    padding: 0.65rem 0.9rem;
+    background: var(--walnut);
+    border-left: 2px solid var(--gold);
+    border-radius: 0 6px 6px 0;
+  }
+  .citation-label {
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    color: var(--gold-dim);
+    text-transform: uppercase;
+    margin-bottom: 5px;
+  }
+  .citation-text {
+    font-size: 13px;
+    font-style: italic;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  /* Typing indicator */
+  .typing-indicator {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 10px 14px;
+  }
+  .typing-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--gold-dim);
+    border-radius: 50%;
+    animation: typingpulse 1.4s ease-in-out infinite;
+  }
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes typingpulse {
+    0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+    40% { opacity: 1; transform: scale(1); }
+  }
+
+  /* === INPUT AREA === */
+  .chat-input-area {
+    padding: 1rem 1.5rem 1.2rem;
+    background: var(--walnut);
+    border-top: 1px solid var(--gold-dim);
+    flex-shrink: 0;
+  }
+  .input-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+  }
+  .input-wrap {
+    flex: 1;
+    background: var(--walnut-mid);
+    border: 1px solid #5A4030;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: border-color 0.15s;
+  }
+  .input-wrap:focus-within { border-color: var(--gold-dim); }
+  #chat-input {
+    width: 100%;
+    padding: 10px 14px;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--vellum);
+    font-family: 'EB Garamond', serif;
+    font-size: 15px;
+    resize: none;
+    min-height: 44px;
+    max-height: 120px;
+    line-height: 1.5;
+  }
+  #chat-input::placeholder { color: var(--text-muted); font-style: italic; }
+  .send-btn {
+    width: 44px;
+    height: 44px;
+    background: var(--gold-dim);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+    flex-shrink: 0;
+    color: var(--walnut);
+  }
+  .send-btn:hover { background: var(--gold); }
+  .send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .send-btn svg { width: 18px; height: 18px; }
+  .input-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 6px;
+    padding: 0 2px;
+  }
+  .input-hint {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+  .doctor-badge {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    color: var(--gold-dim);
+    background: var(--walnut-mid);
+    padding: 2px 8px;
+    border-radius: 10px;
+    border: 1px solid var(--gold-dim);
+  }
+
+  /* Scrollbar for main chat */
+  * { scrollbar-width: thin; scrollbar-color: var(--gold-dim) transparent; }
+
+  @media (max-width: 640px) {
+    .sidebar { display: none; }
+    .chat-messages { padding: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="app-header">
+  <div class="header-brand">
+    <svg class="rose-window" id="main-rose" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="18" cy="18" r="17" stroke="#C9A84C" stroke-width="0.8" fill="none"/>
+      <circle cx="18" cy="18" r="3" fill="#C9A84C" opacity="0.9"/>
+      <!-- 8 petals -->
+      <g class="petal">
+        <ellipse cx="18" cy="9" rx="2.2" ry="4.5" fill="#C9A84C" opacity="0.5"/>
+        <ellipse cx="18" cy="9" rx="2.2" ry="4.5" fill="#C9A84C" opacity="0.5" transform="rotate(45 18 18)"/>
+        <ellipse cx="18" cy="9" rx="2.2" ry="4.5" fill="#C9A84C" opacity="0.5" transform="rotate(90 18 18)"/>
+        <ellipse cx="18" cy="9" rx="2.2" ry="4.5" fill="#C9A84C" opacity="0.5" transform="rotate(135 18 18)"/>
+        <ellipse cx="18" cy="9" rx="2.2" ry="4.5" fill="#C9A84C" opacity="0.5" transform="rotate(180 18 18)"/>
+        <ellipse cx="18" cy="9" rx="2.2" ry="4.5" fill="#C9A84C" opacity="0.5" transform="rotate(225 18 18)"/>
+        <ellipse cx="18" cy="9" rx="2.2" ry="4.5" fill="#C9A84C" opacity="0.5" transform="rotate(270 18 18)"/>
+        <ellipse cx="18" cy="9" rx="2.2" ry="4.5" fill="#C9A84C" opacity="0.5" transform="rotate(315 18 18)"/>
+      </g>
+      <circle cx="18" cy="18" r="7" stroke="#C9A84C" stroke-width="0.6" fill="none" opacity="0.4"/>
+    </svg>
+    <div class="brand-text">
+      <div class="brand-title">Wisdom of the Doctors</div>
+      <div class="brand-sub">A spiritual guide from the tradition</div>
+    </div>
+  </div>
+  <div class="header-actions">
+    <span id="mode-label" class="doctor-badge">All Doctors</span>
+  </div>
+</header>
+
+<!-- BODY -->
+<div class="app-body">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Seek Wisdom From</div>
+      <button class="doctor-btn active" data-doctor="all" onclick="setDoctor(this)">
+        <span class="doctor-icon icon-all">✦</span>All Doctors
+      </button>
+      <button class="doctor-btn" data-doctor="sales" onclick="setDoctor(this)">
+        <span class="doctor-icon icon-sales">FS</span>St. Francis de Sales
+      </button>
+      <button class="doctor-btn" data-doctor="augustine" onclick="setDoctor(this)">
+        <span class="doctor-icon icon-aug">SA</span>St. Augustine
+      </button>
+      <button class="doctor-btn" data-doctor="therese" onclick="setDoctor(this)">
+        <span class="doctor-icon icon-therese">ST</span>St. Thérèse of Lisieux
+      </button>
+    </div>
+    <div class="saved-list">
+      <div class="saved-label">Saved Insights</div>
+      <div id="saved-container">
+        <p class="saved-empty">Insights you save will appear here for your reflection.</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- CHAT -->
+  <div class="chat-area">
+    <div class="chat-messages" id="chat-messages">
+      <div class="welcome-screen" id="welcome-screen">
+        <svg class="welcome-rose" width="60" height="60" viewBox="0 0 60 60" fill="none">
+          <circle cx="30" cy="30" r="29" stroke="#C9A84C" stroke-width="0.8" fill="none"/>
+          <circle cx="30" cy="30" r="5" fill="#C9A84C" opacity="0.9"/>
+          <g opacity="0.5">
+            <ellipse cx="30" cy="13" rx="4" ry="9" fill="#C9A84C"/>
+            <ellipse cx="30" cy="13" rx="4" ry="9" fill="#C9A84C" transform="rotate(45 30 30)"/>
+            <ellipse cx="30" cy="13" rx="4" ry="9" fill="#C9A84C" transform="rotate(90 30 30)"/>
+            <ellipse cx="30" cy="13" rx="4" ry="9" fill="#C9A84C" transform="rotate(135 30 30)"/>
+            <ellipse cx="30" cy="13" rx="4" ry="9" fill="#C9A84C" transform="rotate(180 30 30)"/>
+            <ellipse cx="30" cy="13" rx="4" ry="9" fill="#C9A84C" transform="rotate(225 30 30)"/>
+            <ellipse cx="30" cy="13" rx="4" ry="9" fill="#C9A84C" transform="rotate(270 30 30)"/>
+            <ellipse cx="30" cy="13" rx="4" ry="9" fill="#C9A84C" transform="rotate(315 30 30)"/>
+          </g>
+          <circle cx="30" cy="30" r="12" stroke="#C9A84C" stroke-width="0.6" fill="none" opacity="0.4"/>
+        </svg>
+        <div class="welcome-title">Ask, and you shall receive</div>
+        <p class="welcome-quote">"Be who you are and be that well."</p>
+        <p class="welcome-attr">— St. Francis de Sales</p>
+        <div class="prompt-chips">
+          <button class="chip" onclick="sendChip(this)">How do I overcome anxiety and worry?</button>
+          <button class="chip" onclick="sendChip(this)">What does it mean to love God?</button>
+          <button class="chip" onclick="sendChip(this)">How can I pray when I feel nothing?</button>
+          <button class="chip" onclick="sendChip(this)">I feel unworthy of God's mercy.</button>
+          <button class="chip" onclick="sendChip(this)">How do I find peace in suffering?</button>
+          <button class="chip" onclick="sendChip(this)">What is the Little Way of St. Thérèse?</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="chat-input-area">
+      <div class="input-row">
+        <div class="input-wrap">
+          <textarea id="chat-input" rows="1" placeholder="Bring your question, your struggle, or your prayer…" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+        </div>
+        <button class="send-btn" id="send-btn" onclick="sendMessage()">
+          <svg viewBox="0 0 20 20" fill="currentColor">
+            <path d="M3.105 2.289a.75.75 0 00-.826.95l1.903 6.557H13.5a.75.75 0 010 1.5H4.182l-1.903 6.557a.75.75 0 00.826.95 28.896 28.896 0 0015.293-7.154.75.75 0 000-1.115A28.897 28.897 0 003.105 2.289z"/>
+          </svg>
+        </button>
+      </div>
+      <div class="input-footer">
+        <span class="input-hint">The saints speak through study, prayer, and grace.</span>
+        <span class="doctor-badge" id="footer-badge">All Doctors</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// === STATE ===
+let currentDoctor = 'all';
+let conversationHistory = [];
+let savedInsights = JSON.parse(localStorage.getItem('wod_insights') || '[]');
+let isLoading = false;
+
+// === KNOWLEDGE BASE (curated passage excerpts) ===
+const CORPUS = {
+  sales: {
+    name: "St. Francis de Sales",
+    title: "Doctor of Devotion (1567–1622)",
+    passages: [
+      { work: "Introduction to the Devout Life", text: "Ask God to give you a great desire to please Him, and be sure that your desires themselves are a form of prayer. Be patient with everyone, but above all with yourself. I mean that you should not be discouraged by your imperfections, but always rise with fresh courage." },
+      { work: "Introduction to the Devout Life", text: "Devout life is not to be separated from ordinary life. Do not wish to be anything but what you are, and try to be that perfectly. The same God who cares for you in one state also cares for you in another. Do not look forward in fear to what might come; the same everlasting Father who cares for you today will take care of you tomorrow." },
+      { work: "Introduction to the Devout Life", text: "Do not lose your inward peace for anything whatsoever, even if your whole world seems upset. What is the use of being troubled? The ship is safer that is tempest-tossed but has a skilled pilot than one in calm waters with no one at the helm." },
+      { work: "The Love of God", text: "The measure of love is to love without measure. True love is always accompanied by gentleness. We must all bear one another's burdens, for that is the law of Christ. Be who you are and be that well, so as to do honour to the Master Craftsman whose handiwork you are." },
+      { work: "Consoling Thoughts", text: "The person who has peace in his conscience does not trouble himself as to what the world says of him. Let the world talk as much as it pleases, since God sees our heart. Have no anxiety for the future, but be busy now with the present." },
+      { work: "The Love of God", text: "The will of God is the very definition of goodness itself. Nothing happens by chance with God, nothing by caprice. When you do not know what to do, simply hold still and wait on the Lord; your doubts will clear, your path will open." }
+    ]
+  },
+  augustine: {
+    name: "St. Augustine of Hippo",
+    title: "Doctor of Grace (354–430)",
+    passages: [
+      { work: "Confessions", text: "Thou madest us for Thyself, and our heart is restless until it repose in Thee. Our heart is restless, O Lord, until it finds rest in You. You have made us for yourself, and our heart is troubled until it rests in You." },
+      { work: "Confessions", text: "Late have I loved Thee, O Beauty so ancient and so new, late have I loved Thee! For behold Thou wert within me, and I without, and I was seeking Thee without. Thou wert with me, and I was not with Thee." },
+      { work: "Confessions", text: "Thou awakest us to delight in Thy praise; for Thou madest us for Thyself. Grant me, Lord, to know and understand which is first, to call on Thee or to praise Thee. Do Thou awaken us, and call us back, inflame us and carry us upward." },
+      { work: "City of God", text: "Our heart is made for Thee, O Lord, and it will not rest until it rests in Thee. The soul of man is by its very nature capable of receiving the gift of God. Even in our sins, we are searching for God under wrong names and in wrong places." },
+      { work: "Sermons on the Psalms", text: "God loves each of us as if there were only one of us. Hope has two beautiful daughters: anger and courage. Anger at the way things are, and courage to work to change them. Do not despair; many people have been saved who have come to God late." },
+      { work: "Confessions", text: "The punishment of sin is sin, and the reward of virtue is virtue. Lord, make me pure — but not yet! is the prayer of those who are not yet ready to surrender. But what joy it is when we finally let go and allow God to be God in our lives." }
+    ]
+  },
+  therese: {
+    name: "St. Thérèse of Lisieux",
+    title: "Doctor of the Little Way (1873–1897)",
+    passages: [
+      { work: "Story of a Soul", text: "I want to find an elevator to raise me to Jesus, for I am too small to climb the rough stairway of perfection. Your arms, O Jesus, are the elevator that must raise me up even to Heaven. To reach You I need not grow; on the contrary, I must remain little, I must become more and more so." },
+      { work: "Story of a Soul", text: "Miss no single opportunity of making some small sacrifice, here by a smiling look, there by a kindly word; always doing the smallest right and doing it all for love. Let us love, since our heart is made for nothing else. The Little Way is the way of spiritual childhood." },
+      { work: "Story of a Soul", text: "I understand so well that it is only love which makes us acceptable to God, that this love is the only good I ambition. Jesus has no need of our works, but only of our love. How I wish I could make souls understand this, for it has given me such peace." },
+      { work: "Story of a Soul", text: "What a grace it is to be convinced of one's own poverty and littleness. To remain little before God: this is the heart of it. I know now that true charity consists in bearing all our neighbors' defects — not being surprised at their weakness, but edified by their smallest virtues." },
+      { work: "Last Conversations", text: "After my death, I will let fall a shower of roses. I will spend my heaven doing good upon earth. Do not weep, for I shall be more useful to you after my death, and I shall help you then more effectively than I do now." },
+      { work: "Story of a Soul", text: "Love is repaid by love alone. Everything is grace. God would not give me this desire for Him if He did not mean to satisfy it. I choose all — I cannot be a saint by halves. I have never given God anything but love, and it is with love that He will repay." }
+    ]
+  }
+};
+
+const DOCTOR_LABELS = {
+  all: 'All Doctors',
+  sales: 'St. Francis de Sales',
+  augustine: 'St. Augustine',
+  therese: 'St. Thérèse'
+};
+
+// === SYSTEM PROMPT BUILDER ===
+function buildSystemPrompt(doctor) {
+  const doctorsToInclude = doctor === 'all'
+    ? ['sales', 'augustine', 'therese']
+    : [doctor];
+
+  let corpusText = '';
+  doctorsToInclude.forEach(key => {
+    const d = CORPUS[key];
+    corpusText += `\n\n== ${d.name} (${d.title}) ==\n`;
+    d.passages.forEach((p, i) => {
+      corpusText += `[${key.toUpperCase()}-${i+1}] From "${p.work}": "${p.text}"\n`;
+    });
+  });
+
+  const focusInstruction = doctor === 'all'
+    ? 'You may draw from any of the three Doctors of the Church below.'
+    : `You are to draw primarily from the writings of ${CORPUS[doctor].name}.`;
+
+  return `You are a warm, pastoral AI spiritual guide called the Wisdom of the Doctors. Your mission is to bring the timeless wisdom of the Catholic Doctors of the Church to modern souls seeking guidance on daily life, prayer, morality, and spiritual growth.
+
+${focusInstruction}
+
+Your persona is:
+- Warm, gentle, and encouraging — never harsh or judgmental
+- Deeply rooted in the Catholic tradition, always pointing toward God's mercy and love
+- Able to translate archaic theological language into modern, accessible English
+- Pastoral first: you meet the person where they are, not where you wish they were
+
+KNOWLEDGE BASE (these are the passages you draw from — treat them as your primary sources):
+${corpusText}
+
+Instructions for every response:
+1. Begin with a brief, empathetic acknowledgment of the person's question or struggle (1-2 sentences).
+2. Draw from 1-3 relevant passages from the knowledge base above to address their question. Synthesize the wisdom into modern, readable English — do not just quote; explain and apply it to their specific situation.
+3. End each response with a "Source" citation formatted exactly like this on its own line:
+   SOURCE: [Doctor's name] — "[Work title]"
+   (List each source used, one per line starting with SOURCE:)
+4. Keep responses warm and personal — use "you" and speak directly to the person.
+5. Do not make up quotations or attribute statements to the saints that are not in the knowledge base. If a question falls outside your corpus, say so gently and offer what wisdom you can.
+6. Never be dismissive of anyone's pain or struggle. The Little Way of St. Thérèse, the restless heart of Augustine, the gentle encouragement of Francis de Sales — these are your tools of mercy.
+7. Keep responses to 150-250 words in the main body (before citations). Be concise and pastoral, not academic.`;
+}
+
+// === UI HELPERS ===
+function setDoctor(btn) {
+  document.querySelectorAll('.doctor-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentDoctor = btn.dataset.doctor;
+  const label = DOCTOR_LABELS[currentDoctor];
+  document.getElementById('mode-label').textContent = label;
+  document.getElementById('footer-badge').textContent = label;
+  conversationHistory = []; // reset conversation when switching doctor
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+}
+
+function sendChip(btn) {
+  document.getElementById('chat-input').value = btn.textContent;
+  sendMessage();
+}
+
+function hideWelcome() {
+  const w = document.getElementById('welcome-screen');
+  if (w) w.remove();
+}
+
+function scrollToBottom() {
+  const c = document.getElementById('chat-messages');
+  c.scrollTop = c.scrollHeight;
+}
+
+function setLoading(val) {
+  isLoading = val;
+  document.getElementById('send-btn').disabled = val;
+  document.getElementById('main-rose').classList.toggle('pulsing', val);
+}
+
+// === SAVE INSIGHTS ===
+function saveInsight(text, doctor) {
+  const snippet = text.replace(/<[^>]+>/g, '').slice(0, 80) + '…';
+  savedInsights.unshift({ snippet, doctor, full: text, time: Date.now() });
+  if (savedInsights.length > 20) savedInsights.pop();
+  localStorage.setItem('wod_insights', JSON.stringify(savedInsights));
+  renderSaved();
+}
+
+function renderSaved() {
+  const container = document.getElementById('saved-container');
+  if (savedInsights.length === 0) {
+    container.innerHTML = '<p class="saved-empty">Insights you save will appear here for your reflection.</p>';
+    return;
+  }
+  container.innerHTML = savedInsights.map((ins, i) =>
+    `<div class="saved-item" title="${ins.doctor}">${ins.snippet}</div>`
+  ).join('');
+}
+
+// === MESSAGE RENDERING ===
+function addUserMessage(text) {
+  hideWelcome();
+  const messages = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'msg user';
+  div.innerHTML = `
+    <div class="msg-avatar avatar-user">✦</div>
+    <div class="msg-bubble">${escHtml(text)}</div>
+  `;
+  messages.appendChild(div);
+  scrollToBottom();
+}
+
+function addTypingIndicator() {
+  const messages = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'msg ai';
+  div.id = 'typing-indicator';
+  div.innerHTML = `
+    <div class="msg-avatar avatar-ai">☩</div>
+    <div class="msg-bubble">
+      <div class="typing-indicator">
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+      </div>
+    </div>
+  `;
+  messages.appendChild(div);
+  scrollToBottom();
+}
+
+function removeTypingIndicator() {
+  const el = document.getElementById('typing-indicator');
+  if (el) el.remove();
+}
+
+function parseResponse(text) {
+  // Extract SOURCE lines
+  const sourceLines = [];
+  const mainText = text.replace(/^SOURCE:.*$/gm, (match) => {
+    sourceLines.push(match.replace(/^SOURCE:\s*/, '').trim());
+    return '';
+  }).trim();
+
+  return { mainText, sources: sourceLines };
+}
+
+function formatMainText(text) {
+  return text
+    .split('\n\n').filter(p => p.trim())
+    .map(p => `<p>${p.trim()}</p>`)
+    .join('');
+}
+
+function addAIMessage(raw) {
+  const { mainText, sources } = parseResponse(raw);
+  const messages = document.getElementById('chat-messages');
+  const msgId = 'msg-' + Date.now();
+  const doctorLabel = DOCTOR_LABELS[currentDoctor];
+
+  let citationsHtml = '';
+  if (sources.length > 0) {
+    citationsHtml = `<div class="citation-block">
+      <div class="citation-label">Sources</div>
+      ${sources.map(s => `<div class="citation-text">${escHtml(s)}</div>`).join('')}
+    </div>`;
+  }
+
+  const div = document.createElement('div');
+  div.className = 'msg ai';
+  div.id = msgId;
+  div.innerHTML = `
+    <div class="msg-avatar avatar-ai">☩</div>
+    <div style="flex:1;min-width:0;">
+      <div class="msg-bubble">
+        ${formatMainText(mainText)}
+        ${citationsHtml}
+      </div>
+      <div class="msg-footer">
+        <span class="msg-doctor-tag">${doctorLabel}</span>
+        <button class="msg-save-btn" onclick="handleSave(this,'${msgId}')">✦ Save insight</button>
+      </div>
+    </div>
+  `;
+  messages.appendChild(div);
+  scrollToBottom();
+}
+
+function handleSave(btn, msgId) {
+  const msgEl = document.getElementById(msgId);
+  if (!msgEl) return;
+  const bubble = msgEl.querySelector('.msg-bubble');
+  saveInsight(bubble.innerHTML, DOCTOR_LABELS[currentDoctor]);
+  btn.textContent = '✦ Saved';
+  btn.classList.add('saved');
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// === MAIN SEND ===
+async function sendMessage() {
+  if (isLoading) return;
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+
+  input.value = '';
+  input.style.height = 'auto';
+  addUserMessage(text);
+  addTypingIndicator();
+  setLoading(true);
+
+  conversationHistory.push({ role: 'user', content: text });
+
+  try {
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        system: buildSystemPrompt(currentDoctor),
+        messages: conversationHistory
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error?.message || 'API error');
+    }
+
+    const reply = data.content.map(b => b.text || '').join('');
+    conversationHistory.push({ role: 'assistant', content: reply });
+
+    removeTypingIndicator();
+    addAIMessage(reply);
+  } catch (err) {
+    removeTypingIndicator();
+    const messages = document.getElementById('chat-messages');
+    const div = document.createElement('div');
+    div.className = 'msg ai';
+    div.innerHTML = `
+      <div class="msg-avatar avatar-ai">☩</div>
+      <div class="msg-bubble" style="border-color:#5A3030;">
+        <p style="color:#C08080;">The spirit is willing but the connection is weak. Please try again in a moment.</p>
+        <p style="font-size:12px;color:var(--text-muted);margin-top:6px;">${escHtml(err.message)}</p>
+      </div>
+    `;
+    messages.appendChild(div);
+    scrollToBottom();
+  } finally {
+    setLoading(false);
+  }
+}
+
+// Init saved
+renderSaved();
+</script>
+</body>
+</html>
