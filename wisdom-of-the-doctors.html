@@ -501,8 +501,40 @@
   /* Scrollbar for main chat */
   * { scrollbar-width: thin; scrollbar-color: var(--gold-dim) transparent; }
 
+  .menu-btn {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: transparent;
+    border: 1px solid var(--gold-dim);
+    border-radius: 6px;
+    color: var(--gold-dim);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .menu-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .sidebar-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    z-index: 99;
+  }
   @media (max-width: 640px) {
-    .sidebar { display: none; }
+    .menu-btn { display: flex; }
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: -240px;
+      height: 100%;
+      z-index: 100;
+      transition: left 0.25s ease;
+      width: 240px;
+    }
+    .sidebar.open { left: 0; }
+    .sidebar-backdrop.visible { display: block; }
     .chat-messages { padding: 1rem; }
   }
 </style>
@@ -535,8 +567,16 @@
   </div>
   <div class="header-actions">
     <span id="mode-label" class="doctor-badge">All Doctors</span>
+    <button class="menu-btn" onclick="toggleSidebar()" aria-label="Open menu">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor">
+        <rect x="1" y="3" width="16" height="1.5" rx="0.75"/>
+        <rect x="1" y="8.25" width="16" height="1.5" rx="0.75"/>
+        <rect x="1" y="13.5" width="16" height="1.5" rx="0.75"/>
+      </svg>
+    </button>
   </div>
 </header>
+<div class="sidebar-backdrop" id="sidebar-backdrop" onclick="closeSidebar()"></div>
 
 <!-- BODY -->
 <div class="app-body">
@@ -639,7 +679,13 @@ const CORPUS = {
       { work: "Introduction to the Devout Life", text: "Do not lose your inward peace for anything whatsoever, even if your whole world seems upset. What is the use of being troubled? The ship is safer that is tempest-tossed but has a skilled pilot than one in calm waters with no one at the helm." },
       { work: "The Love of God", text: "The measure of love is to love without measure. True love is always accompanied by gentleness. We must all bear one another's burdens, for that is the law of Christ. Be who you are and be that well, so as to do honour to the Master Craftsman whose handiwork you are." },
       { work: "Consoling Thoughts", text: "The person who has peace in his conscience does not trouble himself as to what the world says of him. Let the world talk as much as it pleases, since God sees our heart. Have no anxiety for the future, but be busy now with the present." },
-      { work: "The Love of God", text: "The will of God is the very definition of goodness itself. Nothing happens by chance with God, nothing by caprice. When you do not know what to do, simply hold still and wait on the Lord; your doubts will clear, your path will open." }
+      { work: "The Love of God", text: "The will of God is the very definition of goodness itself. Nothing happens by chance with God, nothing by caprice. When you do not know what to do, simply hold still and wait on the Lord; your doubts will clear, your path will open." },
+      { work: "Introduction to the Devout Life", text: "Nothing so effectually mortifies the heart as humility, and nothing so destroys it as pride. When we are angry with ourselves at our faults, it is often not because they offended God but because they embarrassed us. True humility is gentle toward oneself — and that gentleness is where all gentleness toward others is born." },
+      { work: "Letters of Spiritual Direction", text: "Do not look forward to what may happen tomorrow. The same everlasting Father who cares for you today will take care of you tomorrow and every day. Either He will shield you from suffering or He will give you unfailing strength to bear it. Be at peace, and put aside all anxious thoughts." },
+      { work: "The Love of God", text: "The soul truly united to God finds all things easy, because she does them through love. When we do small things through love they become great before God. The heart that loves is like a mother who never tires of her child; love makes every burden light and every path straight." },
+      { work: "Introduction to the Devout Life", text: "Choose friends who are good, virtuous, and truthful. The friendship of virtue is never broken except by sin, and it grows stronger with each passing day. Do not multiply friendships; a few deep and holy bonds are worth more than many shallow ones. Those who travel together toward God travel well." },
+      { work: "Consoling Thoughts", text: "Death is nothing to fear for one who has lived in God's love. It is the final surrender, the last act of trust. All our life has been a preparation for this moment of meeting. Those who die in God are not lost — they are gathered like late roses into an eternal garden." },
+      { work: "The Love of God", text: "Holy indifference is not coldness; it is the warmth of a will perfectly free to follow God wherever He leads. The surrendered soul says not merely 'Thy will be done' as resignation, but as joy — for they have learned that God's will is always mercy dressed as circumstance." }
     ]
   },
   augustine: {
@@ -651,7 +697,13 @@ const CORPUS = {
       { work: "Confessions", text: "Thou awakest us to delight in Thy praise; for Thou madest us for Thyself. Grant me, Lord, to know and understand which is first, to call on Thee or to praise Thee. Do Thou awaken us, and call us back, inflame us and carry us upward." },
       { work: "City of God", text: "Our heart is made for Thee, O Lord, and it will not rest until it rests in Thee. The soul of man is by its very nature capable of receiving the gift of God. Even in our sins, we are searching for God under wrong names and in wrong places." },
       { work: "Sermons on the Psalms", text: "God loves each of us as if there were only one of us. Hope has two beautiful daughters: anger and courage. Anger at the way things are, and courage to work to change them. Do not despair; many people have been saved who have come to God late." },
-      { work: "Confessions", text: "The punishment of sin is sin, and the reward of virtue is virtue. Lord, make me pure — but not yet! is the prayer of those who are not yet ready to surrender. But what joy it is when we finally let go and allow God to be God in our lives." }
+      { work: "Confessions", text: "The punishment of sin is sin, and the reward of virtue is virtue. Lord, make me pure — but not yet! is the prayer of those who are not yet ready to surrender. But what joy it is when we finally let go and allow God to be God in our lives." },
+      { work: "Confessions", text: "Thou wert calling and crying aloud to me, shattering my deafness. Thou wert gleaming and glowing, and dispelling my blindness. You were fragrant, and I drew in breath — and now I pant after Thee. I tasted, and now I hunger and thirst. You touched me, and I burned for Thy peace." },
+      { work: "On Christian Doctrine", text: "You have commanded us to love God and neighbor, and in these two all the Law is summed. Love, and do what you will: if you hold your peace, hold it through love; if you cry out, cry out through love; if you correct, correct through love. Let love be the root within you — from this root nothing but good can spring." },
+      { work: "Sermons on the Psalms", text: "Sing to the Lord a new song — and this new song is the song of love. Whoever has learned to love, sings. But the old person, still captive to sin, cannot sing what is new. You must first be made new, and then you will sing what is new. The life of praise is the life of love." },
+      { work: "Confessions", text: "I have learnt to love Thee late, Thou Beauty ever old and ever new. What held me far from Thee was I myself, and I myself kept myself from Thee. There is a joy which is given not to the wicked, but to those who worship Thee for Thine own sake — and Thyself art that joy." },
+      { work: "City of God", text: "Two cities have been formed by two loves: the earthly by love of self to the contempt of God, the heavenly by love of God to the contempt of self. The one glories in itself, the other in the Lord. The one seeks glory from men; the other finds its highest glory in God, the witness of conscience." },
+      { work: "Sermons", text: "Do not lose heart because of your sins. Even if you have sinned greatly, do not despair. I do not say to you: do not sin any more — we are all sinners. I say: do not despair. The remedy for sin is not despair but repentance, and God is always ready to receive the one who turns back." }
     ]
   },
   therese: {
@@ -663,7 +715,13 @@ const CORPUS = {
       { work: "Story of a Soul", text: "I understand so well that it is only love which makes us acceptable to God, that this love is the only good I ambition. Jesus has no need of our works, but only of our love. How I wish I could make souls understand this, for it has given me such peace." },
       { work: "Story of a Soul", text: "What a grace it is to be convinced of one's own poverty and littleness. To remain little before God: this is the heart of it. I know now that true charity consists in bearing all our neighbors' defects — not being surprised at their weakness, but edified by their smallest virtues." },
       { work: "Last Conversations", text: "After my death, I will let fall a shower of roses. I will spend my heaven doing good upon earth. Do not weep, for I shall be more useful to you after my death, and I shall help you then more effectively than I do now." },
-      { work: "Story of a Soul", text: "Love is repaid by love alone. Everything is grace. God would not give me this desire for Him if He did not mean to satisfy it. I choose all — I cannot be a saint by halves. I have never given God anything but love, and it is with love that He will repay." }
+      { work: "Story of a Soul", text: "Love is repaid by love alone. Everything is grace. God would not give me this desire for Him if He did not mean to satisfy it. I choose all — I cannot be a saint by halves. I have never given God anything but love, and it is with love that He will repay." },
+      { work: "Story of a Soul", text: "I have always wanted to be a saint, but when I compare myself to the saints I feel I am as far from them as a grain of sand from a mountain. Instead of being discouraged, I said to myself: God would not inspire desires that cannot be realised. My littleness is not an obstacle — it is the very condition of His mercy." },
+      { work: "Letters to Céline", text: "Let us offer all our little sacrifices with love. Even the tiniest pinprick, offered with love, becomes a treasure. We are not great souls who can do great things — but we can love greatly in small things. It is not the greatness of the action but the love with which it is done that gives it worth before God." },
+      { work: "Story of a Soul", text: "I have found my vocation at last — my vocation is love. In the heart of the Church, my Mother, I will be love. Thus I will be everything, and my dream will be realized. How can a soul so imperfect as mine aspire to love fully? Only by throwing itself into the arms of Jesus." },
+      { work: "Last Conversations", text: "Do not be troubled when you feel nothing in prayer. Dryness is not absence — God is still present in the darkness. I myself have long periods of dryness in which I feel nothing. But feelings are not faith, and faith does not require feelings. It is enough to show up and remain." },
+      { work: "Story of a Soul", text: "It seems to me that if a little bird tried to fly toward the sun, it would not first study favorable conditions. It would simply spread its wings. Our weakness does not hold us back from God — it is the very wing on which He lifts us. The weaker we are, the more He carries." },
+      { work: "Story of a Soul", text: "To live by love is to go about sowing peace and joy in every heart. It means giving without counting the cost, with no thought of return. It is to follow Jesus who spent His whole life giving — from the manger to the cross. Love is repaid by love alone, and God's love is inexhaustible." }
     ]
   }
 };
@@ -808,6 +866,7 @@ function renderSessions(sessions) {
 
 async function loadSession(sessionId, doctor) {
   if (currentSessionId === sessionId) return;
+  closeSidebar();
   try {
     const res = await fetch(`/api/messages?session_id=${sessionId}`);
     if (!res.ok) return;
@@ -864,6 +923,7 @@ async function saveMessage(role, content) {
 }
 
 function newConversation() {
+  closeSidebar();
   currentSessionId = null;
   conversationHistory = [];
   document.getElementById('chat-messages').innerHTML = `
@@ -1001,7 +1061,17 @@ function escHtml(str) {
   return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// === MAIN SEND ===
+// === MOBILE SIDEBAR ===
+function toggleSidebar() {
+  document.querySelector('.sidebar').classList.toggle('open');
+  document.getElementById('sidebar-backdrop').classList.toggle('visible');
+}
+function closeSidebar() {
+  document.querySelector('.sidebar').classList.remove('open');
+  document.getElementById('sidebar-backdrop').classList.remove('visible');
+}
+
+// === MAIN SEND (streaming) ===
 async function sendMessage() {
   if (isLoading) return;
   const input = document.getElementById('chat-input');
@@ -1011,12 +1081,30 @@ async function sendMessage() {
   input.value = '';
   input.style.height = 'auto';
   addUserMessage(text);
-  addTypingIndicator();
   setLoading(true);
 
   conversationHistory.push({ role: 'user', content: text });
   await ensureSession(text);
   saveMessage('user', text);
+
+  const msgId = 'msg-' + Date.now();
+  const messagesEl = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'msg ai';
+  div.id = msgId;
+  div.innerHTML = `
+    <div class="msg-avatar avatar-ai">☩</div>
+    <div style="flex:1;min-width:0;">
+      <div class="msg-bubble" id="${msgId}-bubble">
+        <div class="typing-indicator">
+          <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
+        </div>
+      </div>
+    </div>`;
+  messagesEl.appendChild(div);
+  scrollToBottom();
+
+  let fullText = '';
 
   try {
     const response = await fetch('/api/chat', {
@@ -1030,31 +1118,72 @@ async function sendMessage() {
       })
     });
 
-    const data = await response.json();
-
     if (!response.ok) {
-      throw new Error(data.error?.message || 'API error');
+      const err = await response.json();
+      throw new Error(err.error?.message || 'API error');
     }
 
-    const reply = data.content.map(b => b.text || '').join('');
-    conversationHistory.push({ role: 'assistant', content: reply });
-    saveMessage('assistant', reply);
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    const bubble = document.getElementById(`${msgId}-bubble`);
 
-    removeTypingIndicator();
-    addAIMessage(reply);
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop();
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const data = line.slice(6).trim();
+        if (!data) continue;
+        try {
+          const parsed = JSON.parse(data);
+          if (parsed.type === 'content_block_delta' && parsed.delta?.type === 'text_delta') {
+            fullText += parsed.delta.text;
+            const { mainText } = parseResponse(fullText);
+            bubble.innerHTML = formatMainText(mainText) || '<span style="opacity:0.4">…</span>';
+            scrollToBottom();
+          }
+        } catch (e) {}
+      }
+    }
+
+    if (fullText) {
+      conversationHistory.push({ role: 'assistant', content: fullText });
+      saveMessage('assistant', fullText);
+      const { mainText, sources } = parseResponse(fullText);
+      const doctorLabel = DOCTOR_LABELS[currentDoctor];
+      let citationsHtml = '';
+      if (sources.length > 0) {
+        citationsHtml = `<div class="citation-block">
+          <div class="citation-label">Sources</div>
+          ${sources.map(s => `<div class="citation-text">${escHtml(s)}</div>`).join('')}
+        </div>`;
+      }
+      div.innerHTML = `
+        <div class="msg-avatar avatar-ai">☩</div>
+        <div style="flex:1;min-width:0;">
+          <div class="msg-bubble">
+            ${formatMainText(mainText)}
+            ${citationsHtml}
+          </div>
+          <div class="msg-footer">
+            <span class="msg-doctor-tag">${doctorLabel}</span>
+            <button class="msg-save-btn" onclick="handleSave(this,'${msgId}')">✦ Save insight</button>
+          </div>
+        </div>`;
+      scrollToBottom();
+    }
   } catch (err) {
-    removeTypingIndicator();
-    const messages = document.getElementById('chat-messages');
-    const div = document.createElement('div');
-    div.className = 'msg ai';
-    div.innerHTML = `
-      <div class="msg-avatar avatar-ai">☩</div>
-      <div class="msg-bubble" style="border-color:#5A3030;">
+    const bubble = document.getElementById(`${msgId}-bubble`);
+    if (bubble) {
+      bubble.style.borderColor = '#5A3030';
+      bubble.innerHTML = `
         <p style="color:#C08080;">The spirit is willing but the connection is weak. Please try again in a moment.</p>
-        <p style="font-size:12px;color:var(--text-muted);margin-top:6px;">${escHtml(err.message)}</p>
-      </div>
-    `;
-    messages.appendChild(div);
+        <p style="font-size:12px;color:var(--text-muted);margin-top:6px;">${escHtml(err.message)}</p>`;
+    }
     scrollToBottom();
   } finally {
     setLoading(false);

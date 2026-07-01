@@ -17,17 +17,33 @@ module.exports = async function handler(req, res) {
         'x-api-key': process.env.ANTHROPIC_API_KEY,
         'anthropic-version': '2023-06-01'
       },
-      body: JSON.stringify({ model, max_tokens, system, messages })
+      body: JSON.stringify({ model, max_tokens, system, messages, stream: true })
     });
 
-    const data = await upstream.json();
-
     if (!upstream.ok) {
+      const data = await upstream.json();
       return res.status(upstream.status).json(data);
     }
 
-    return res.status(200).json(data);
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders();
+
+    const reader = upstream.body.getReader();
+    const decoder = new TextDecoder();
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      res.write(decoder.decode(value, { stream: true }));
+    }
+    res.end();
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    try {
+      res.status(500).json({ error: err.message });
+    } catch (e) {
+      res.end();
+    }
   }
 };
