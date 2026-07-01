@@ -193,6 +193,49 @@
     transition: color 0.15s;
   }
   .save-btn-small:hover { color: var(--gold); }
+  .new-session-btn {
+    width: 100%;
+    padding: 6px 10px;
+    background: transparent;
+    border: 1px solid var(--gold-dim);
+    border-radius: 6px;
+    color: var(--gold-dim);
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: all 0.15s;
+  }
+  .new-session-btn:hover { border-color: var(--gold); color: var(--gold); background: var(--walnut-mid); }
+  .session-item {
+    padding: 7px 8px;
+    border-left: 2px solid var(--gold-dim);
+    margin-bottom: 6px;
+    cursor: pointer;
+    transition: all 0.1s;
+    border-radius: 0 4px 4px 0;
+  }
+  .session-item:hover { background: var(--walnut-mid); }
+  .session-item.active { border-left-color: var(--gold); background: var(--walnut-mid); }
+  .session-title {
+    display: block;
+    font-size: 12px;
+    font-style: italic;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .session-item:hover .session-title, .session-item.active .session-title { color: var(--vellum-dim); }
+  .session-meta {
+    font-size: 10px;
+    color: var(--text-muted);
+    opacity: 0.6;
+    margin-top: 2px;
+    font-family: 'Cinzel', serif;
+    letter-spacing: 0.04em;
+  }
 
   /* === CHAT AREA === */
   .chat-area {
@@ -514,11 +557,12 @@
       <button class="doctor-btn" data-doctor="therese" onclick="setDoctor(this)">
         <span class="doctor-icon icon-therese">ST</span>St. Thérèse of Lisieux
       </button>
+      <button class="new-session-btn" onclick="newConversation()">+ New Conversation</button>
     </div>
     <div class="saved-list">
-      <div class="saved-label">Saved Insights</div>
-      <div id="saved-container">
-        <p class="saved-empty">Insights you save will appear here for your reflection.</p>
+      <div class="saved-label">Past Sessions</div>
+      <div id="sessions-container">
+        <p class="saved-empty">Your conversations will appear here.</p>
       </div>
     </div>
   </aside>
@@ -578,6 +622,8 @@
 <script>
 // === STATE ===
 let currentDoctor = 'all';
+let currentSessionId = null;
+let cachedSessions = [];
 let conversationHistory = [];
 let savedInsights = JSON.parse(localStorage.getItem('wod_insights') || '[]');
 let isLoading = false;
@@ -682,6 +728,8 @@ function setDoctor(btn) {
   document.getElementById('mode-label').textContent = label;
   document.getElementById('footer-badge').textContent = label;
   conversationHistory = []; // reset conversation when switching doctor
+  currentSessionId = null;
+  renderSessions(cachedSessions);
 }
 
 function autoResize(el) {
@@ -727,14 +775,127 @@ function saveInsight(text, doctor) {
 }
 
 function renderSaved() {
-  const container = document.getElementById('saved-container');
-  if (savedInsights.length === 0) {
-    container.innerHTML = '<p class="saved-empty">Insights you save will appear here for your reflection.</p>';
+  // insights still saved to localStorage; sidebar now shows sessions
+}
+
+// === SESSIONS ===
+async function loadSessions() {
+  try {
+    const res = await fetch('/api/sessions');
+    if (!res.ok) return;
+    cachedSessions = await res.json();
+    renderSessions(cachedSessions);
+  } catch (e) { /* silent — DB unavailable */ }
+}
+
+function renderSessions(sessions) {
+  const container = document.getElementById('sessions-container');
+  if (!container) return;
+  if (!sessions || sessions.length === 0) {
+    container.innerHTML = '<p class="saved-empty">Your conversations will appear here.</p>';
     return;
   }
-  container.innerHTML = savedInsights.map((ins, i) =>
-    `<div class="saved-item" title="${ins.doctor}">${ins.snippet}</div>`
-  ).join('');
+  container.innerHTML = sessions.map(s => {
+    const date = new Date(s.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    const doctorShort = { all: '✦', sales: 'FS', augustine: 'SA', therese: 'ST' }[s.doctor] || '✦';
+    const active = s.id === currentSessionId ? ' active' : '';
+    return `<div class="session-item${active}" onclick="loadSession('${s.id}', '${s.doctor}')">
+      <span class="session-title">${doctorShort} ${escHtml(s.title || 'Conversation')}</span>
+      <span class="session-meta">${date}</span>
+    </div>`;
+  }).join('');
+}
+
+async function loadSession(sessionId, doctor) {
+  if (currentSessionId === sessionId) return;
+  try {
+    const res = await fetch(`/api/messages?session_id=${sessionId}`);
+    if (!res.ok) return;
+    const msgs = await res.json();
+
+    currentSessionId = sessionId;
+    currentDoctor = doctor;
+    conversationHistory = [];
+
+    // Sync doctor selector UI
+    document.querySelectorAll('.doctor-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.doctor === doctor);
+    });
+    const label = DOCTOR_LABELS[doctor] || 'All Doctors';
+    document.getElementById('mode-label').textContent = label;
+    document.getElementById('footer-badge').textContent = label;
+
+    // Re-render chat
+    document.getElementById('chat-messages').innerHTML = '';
+    msgs.forEach(m => {
+      conversationHistory.push({ role: m.role, content: m.content });
+      if (m.role === 'user') addUserMessage(m.content);
+      else addAIMessage(m.content);
+    });
+
+    renderSessions(cachedSessions);
+  } catch (e) { /* silent */ }
+}
+
+async function ensureSession(firstMessage) {
+  if (currentSessionId) return;
+  try {
+    const res = await fetch('/api/sessions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ doctor: currentDoctor, title: firstMessage.slice(0, 60) })
+    });
+    if (!res.ok) return;
+    const session = await res.json();
+    currentSessionId = session.id;
+    await loadSessions();
+  } catch (e) { /* silent */ }
+}
+
+async function saveMessage(role, content) {
+  if (!currentSessionId) return;
+  try {
+    await fetch('/api/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ session_id: currentSessionId, role, content })
+    });
+  } catch (e) { /* silent */ }
+}
+
+function newConversation() {
+  currentSessionId = null;
+  conversationHistory = [];
+  document.getElementById('chat-messages').innerHTML = `
+    <div class="welcome-screen" id="welcome-screen">
+      <svg class="welcome-rose" width="60" height="60" viewBox="0 0 60 60" fill="none">
+        <circle cx="30" cy="30" r="29" stroke="#C9A84C" stroke-width="0.8" fill="none"/>
+        <circle cx="30" cy="30" r="5" fill="#C9A84C" opacity="0.9"/>
+        <g opacity="0.5">
+          <ellipse cx="30" cy="13" rx="4" ry="9" fill="#C9A84C"/>
+          <ellipse cx="30" cy="13" rx="4" ry="9" fill="#C9A84C" transform="rotate(45 30 30)"/>
+          <ellipse cx="30" cy="13" rx="4" ry="9" fill="#C9A84C" transform="rotate(90 30 30)"/>
+          <ellipse cx="30" cy="13" rx="4" ry="9" fill="#C9A84C" transform="rotate(135 30 30)"/>
+          <ellipse cx="30" cy="13" rx="4" ry="9" fill="#C9A84C" transform="rotate(180 30 30)"/>
+          <ellipse cx="30" cy="13" rx="4" ry="9" fill="#C9A84C" transform="rotate(225 30 30)"/>
+          <ellipse cx="30" cy="13" rx="4" ry="9" fill="#C9A84C" transform="rotate(270 30 30)"/>
+          <ellipse cx="30" cy="13" rx="4" ry="9" fill="#C9A84C" transform="rotate(315 30 30)"/>
+        </g>
+        <circle cx="30" cy="30" r="12" stroke="#C9A84C" stroke-width="0.6" fill="none" opacity="0.4"/>
+      </svg>
+      <div class="welcome-title">Ask, and you shall receive</div>
+      <p class="welcome-quote">"Be who you are and be that well."</p>
+      <p class="welcome-attr">— St. Francis de Sales</p>
+      <div class="prompt-chips">
+        <button class="chip" onclick="sendChip(this)">How do I overcome anxiety and worry?</button>
+        <button class="chip" onclick="sendChip(this)">What does it mean to love God?</button>
+        <button class="chip" onclick="sendChip(this)">How can I pray when I feel nothing?</button>
+        <button class="chip" onclick="sendChip(this)">I feel unworthy of God's mercy.</button>
+        <button class="chip" onclick="sendChip(this)">How do I find peace in suffering?</button>
+        <button class="chip" onclick="sendChip(this)">What is the Little Way of St. Thérèse?</button>
+      </div>
+    </div>`;
+  renderSessions(cachedSessions);
 }
 
 // === MESSAGE RENDERING ===
@@ -854,6 +1015,8 @@ async function sendMessage() {
   setLoading(true);
 
   conversationHistory.push({ role: 'user', content: text });
+  await ensureSession(text);
+  saveMessage('user', text);
 
   try {
     const response = await fetch('/api/chat', {
@@ -875,6 +1038,7 @@ async function sendMessage() {
 
     const reply = data.content.map(b => b.text || '').join('');
     conversationHistory.push({ role: 'assistant', content: reply });
+    saveMessage('assistant', reply);
 
     removeTypingIndicator();
     addAIMessage(reply);
@@ -897,8 +1061,9 @@ async function sendMessage() {
   }
 }
 
-// Init saved
+// Init
 renderSaved();
+loadSessions();
 </script>
 </body>
 </html>
