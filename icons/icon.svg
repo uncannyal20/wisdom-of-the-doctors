@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#1A1108"/>
+  <circle cx="256" cy="256" r="240" stroke="#C9A84C" stroke-width="8" fill="none"/>
+  <circle cx="256" cy="256" r="48" fill="#C9A84C" opacity="0.9"/>
+  <g opacity="0.6">
+    <ellipse cx="256" cy="128" rx="30" ry="72" fill="#C9A84C"/>
+    <ellipse cx="256" cy="128" rx="30" ry="72" fill="#C9A84C" transform="rotate(45 256 256)"/>
+    <ellipse cx="256" cy="128" rx="30" ry="72" fill="#C9A84C" transform="rotate(90 256 256)"/>
+    <ellipse cx="256" cy="128" rx="30" ry="72" fill="#C9A84C" transform="rotate(135 256 256)"/>
+    <ellipse cx="256" cy="128" rx="30" ry="72" fill="#C9A84C" transform="rotate(180 256 256)"/>
+    <ellipse cx="256" cy="128" rx="30" ry="72" fill="#C9A84C" transform="rotate(225 256 256)"/>
+    <ellipse cx="256" cy="128" rx="30" ry="72" fill="#C9A84C" transform="rotate(270 256 256)"/>
+    <ellipse cx="256" cy="128" rx="30" ry="72" fill="#C9A84C" transform="rotate(315 256 256)"/>
+  </g>
+  <circle cx="256" cy="256" r="112" stroke="#C9A84C" stroke-width="6" fill="none" opacity="0.4"/>
+</svg>

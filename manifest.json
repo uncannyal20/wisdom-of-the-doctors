@@ -1,0 +1,18 @@
+{
+  "name": "Wisdom of the Doctors",
+  "short_name": "Wisdom",
+  "description": "A spiritual guide from the Catholic Doctors of the Church",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1A1108",
+  "theme_color": "#C9A84C",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
