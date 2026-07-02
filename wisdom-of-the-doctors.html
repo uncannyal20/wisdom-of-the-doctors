@@ -859,6 +859,13 @@
         <p class="saved-empty">Your conversations will appear here.</p>
       </div>
     </div>
+
+    <div class="saved-list" style="margin-top: 1.5rem; border-top: 1px solid #3D2B1F; padding-top: 1rem;">
+      <div class="saved-label">Saved Insights</div>
+      <div id="insights-container">
+        <p class="saved-empty">Saved insights will appear here.</p>
+      </div>
+    </div>
   </aside>
 
   <!-- SIDEBAR TOGGLE BUTTON -->
@@ -1122,7 +1129,57 @@ function saveInsight(text, doctor) {
 }
 
 function renderSaved() {
-  // insights still saved to localStorage; sidebar now shows sessions
+  const container = document.getElementById('insights-container');
+  if (!container) return;
+  if (savedInsights.length === 0) {
+    container.innerHTML = `<p class="saved-empty">Saved insights will appear here.</p>`;
+    return;
+  }
+  container.innerHTML = savedInsights.map((insight, idx) => {
+    return `<div class="saved-item" onclick="showSavedInsight(${idx})" style="padding: 8px 10px; font-size: 12px; margin-bottom: 4px; border-radius: 4px; cursor: pointer; transition: background 0.15s; line-height: 1.4; border: 1px solid transparent; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">
+      <strong style="color: var(--gold); display: block; font-size: 9px; text-transform: uppercase; letter-spacing: 0.05em; font-family: 'Cinzel', serif; margin-bottom: 2px;">${escHtml(insight.doctor)}</strong>
+      <span style="color: var(--vellum-dim); font-size: 11.5px; font-style: italic;">"${escHtml(insight.snippet)}"</span>
+    </div>`;
+  }).join('');
+}
+
+function showSavedInsight(idx) {
+  const insight = savedInsights[idx];
+  if (!insight) return;
+
+  const backdrop = document.getElementById('modal-backdrop');
+  const content = document.getElementById('modal-content');
+  if (!backdrop || !content) return;
+
+  content.innerHTML = `
+    <h2 style="font-family: 'Cinzel', serif; color: var(--gold); font-size: 17px; text-align: center; margin-top: 0.5rem; margin-bottom: 1.5rem; letter-spacing: 0.08em; text-transform: uppercase; border-bottom: 1px double var(--gold-dim); padding-bottom: 8px;">
+      ☩ Saved Insight ☩
+    </h2>
+    <div style="font-size: 9px; color: var(--gold-dim); font-family: 'Cinzel', serif; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 15px; text-align: center;">
+      Counsel from ${escHtml(insight.doctor)}
+    </div>
+    <div class="reflection-body" style="font-family: 'EB Garamond', Georgia, serif; line-height: 1.7; color: var(--vellum); font-size: 15.5px;">
+      ${insight.full}
+    </div>
+    <div style="display: flex; justify-content: center; margin-top: 2rem; gap: 12px;">
+      <button class="new-session-btn" onclick="deleteSavedInsight(${idx})" style="width: auto; padding: 6px 16px; border-color: #5a3030; color: #c08080; font-size: 11px;">
+        Delete Insight
+      </button>
+      <button class="new-session-btn" onclick="closeSummaryModal()" style="width: auto; padding: 6px 20px; border-color: var(--gold); color: var(--gold); font-size: 11px;">
+        Close
+      </button>
+    </div>
+  `;
+  backdrop.style.display = 'flex';
+}
+
+function deleteSavedInsight(idx) {
+  if (confirm("Are you sure you want to remove this saved insight?")) {
+    savedInsights.splice(idx, 1);
+    localStorage.setItem('wod_insights', JSON.stringify(savedInsights));
+    renderSaved();
+    closeSummaryModal();
+  }
 }
 
 // === AUTHENTICATION ===
