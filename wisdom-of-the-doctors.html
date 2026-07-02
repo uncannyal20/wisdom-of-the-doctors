@@ -1139,7 +1139,10 @@ async function initAuth() {
     console.error("Auth init error:", e);
     handleSessionChange(null);
     const warning = document.getElementById('local-server-warning');
-    if (warning) warning.style.display = 'block';
+    if (warning) {
+      warning.innerHTML = `⚠️ Auth initialization failed: ${escHtml(e.message)}.<br>Please check console or ensure the app is running via 'npx vercel dev' and environment variables are set in Vercel.`;
+      warning.style.display = 'block';
+    }
   }
 }
 
