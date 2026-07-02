@@ -365,6 +365,11 @@
     max-width: 680px;
   }
   .msg.user { align-self: flex-end; flex-direction: row-reverse; }
+  .msg.ai {
+    line-height: 1.7; /* Increased for a 'slow' reading feel */
+    letter-spacing: 0.01em;
+    margin-bottom: 2em;
+  }
   .msg-avatar {
     width: 32px;
     height: 32px;
@@ -398,7 +403,10 @@
   .msg-bubble p { margin-bottom: 0.75em; }
   .msg-bubble p:last-child { margin-bottom: 0; }
   .msg-bubble strong { color: var(--gold); font-weight: 500; }
-  .msg-bubble em { color: var(--vellum-dim); }
+  .msg-bubble em {
+    font-style: italic;
+    color: #C9A84C; /* Using the gold accent for quotes to add warmth */
+  }
   .msg-footer {
     display: flex;
     align-items: center;
@@ -428,11 +436,11 @@
 
   /* Citation block */
   .citation-block {
-    margin-top: 0.85rem;
-    padding: 0.65rem 0.9rem;
-    background: var(--walnut);
-    border-left: 2px solid var(--gold);
-    border-radius: 0 6px 6px 0;
+    font-size: 0.8em;
+    color: #A0907A;
+    margin-top: 1em;
+    border-top: 1px solid #3D2B1F;
+    padding-top: 0.5em;
   }
   .citation-label {
     font-family: 'Cinzel', serif;
@@ -1430,10 +1438,49 @@ function parseResponse(text) {
 }
 
 function formatMainText(text) {
-  return text
+  if (!text) return '';
+  // Convert horizontal rules
+  let html = text.replace(/^---$/gm, '<hr style="border:0; border-top:1px double var(--gold-dim); margin: 12px 0;">');
+  // Convert bold-italics: ***text***
+  html = html.replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>');
+  // Convert bold: **text**
+  html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  // Convert italics: *text*
+  html = html.replace(/\*([^\*]+)\*/g, '<em>$1</em>');
+
+  return html
     .split('\n\n').filter(p => p.trim())
-    .map(p => `<p>${p.trim()}</p>`)
+    .map(p => {
+      const trimmed = p.trim();
+      if (trimmed.startsWith('<hr')) return trimmed;
+      return `<p>${trimmed}</p>`;
+    })
     .join('');
+}
+
+function buildCitationsHtml(sources) {
+  if (!sources || sources.length === 0) return '';
+  const uniqueId = 'citations-' + Date.now() + '-' + Math.floor(Math.random() * 10000);
+  return `
+    <div class="citation-toggle-wrapper" style="margin-top: 8px;">
+      <button class="citation-toggle-btn" onclick="toggleCitations('${uniqueId}', this)" style="background:transparent; border:none; color:var(--gold-dim); font-size:11px; cursor:pointer; padding:0; font-family:'Cinzel', serif; letter-spacing:0.05em; outline:none;">[Sources]</button>
+    </div>
+    <div class="citation-block" id="${uniqueId}" style="display: none;">
+      ${sources.map(s => `<div class="citation-text" style="margin-bottom:4px;">${escHtml(s)}</div>`).join('')}
+    </div>
+  `;
+}
+
+function toggleCitations(id, btn) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (el.style.display === 'none') {
+    el.style.display = 'block';
+    btn.textContent = '[Hide Sources]';
+  } else {
+    el.style.display = 'none';
+    btn.textContent = '[Sources]';
+  }
 }
 
 function addAIMessage(raw) {
@@ -1442,13 +1489,7 @@ function addAIMessage(raw) {
   const msgId = 'msg-' + Date.now();
   const doctorLabel = DOCTOR_LABELS[currentDoctor];
 
-  let citationsHtml = '';
-  if (sources.length > 0) {
-    citationsHtml = `<div class="citation-block">
-      <div class="citation-label">Sources</div>
-      ${sources.map(s => `<div class="citation-text">${escHtml(s)}</div>`).join('')}
-    </div>`;
-  }
+  const citationsHtml = buildCitationsHtml(sources);
 
   const div = document.createElement('div');
   div.className = 'msg ai';
@@ -1581,13 +1622,7 @@ async function sendMessage() {
       saveMessage('assistant', fullText);
       const { mainText, sources } = parseResponse(fullText);
       const doctorLabel = DOCTOR_LABELS[currentDoctor];
-      let citationsHtml = '';
-      if (sources.length > 0) {
-        citationsHtml = `<div class="citation-block">
-          <div class="citation-label">Sources</div>
-          ${sources.map(s => `<div class="citation-text">${escHtml(s)}</div>`).join('')}
-        </div>`;
-      }
+      const citationsHtml = buildCitationsHtml(sources);
       div.innerHTML = `
         <div class="msg-avatar avatar-ai">☩</div>
         <div style="flex:1;min-width:0;">
