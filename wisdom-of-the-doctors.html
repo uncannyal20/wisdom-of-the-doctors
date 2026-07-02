@@ -705,6 +705,48 @@
 </head>
 <body>
 
+<!-- FULLSCREEN LOGIN OVERLAY -->
+<div id="login-overlay" style="display: none; position: fixed; inset: 0; background: var(--ink); z-index: 200; align-items: center; justify-content: center; flex-direction: column; padding: 2rem; font-family: 'EB Garamond', Georgia, serif;">
+  <div class="welcome-screen" style="max-width: 480px; text-align: center; border: 1px solid var(--gold-dim); padding: 3rem 2rem; border-radius: 8px; background: var(--walnut); box-shadow: 0 10px 30px rgba(0,0,0,0.6); display: flex; flex-direction: column; align-items: center; gap: 1.5rem;">
+    <svg class="welcome-rose pulsing" width="80" height="80" viewBox="0 0 60 60" fill="none" style="margin-bottom: 0.5rem;">
+      <circle cx="30" cy="30" r="29" stroke="#C9A84C" stroke-width="0.8" fill="none"/>
+      <circle cx="30" cy="30" r="5" fill="#C9A84C" opacity="0.9"/>
+      <g opacity="0.5">
+        <ellipse cx="30" cy="13" rx="4" ry="9" fill="#C9A84C"/>
+        <ellipse cx="30" cy="13" rx="4" ry="9" fill="#C9A84C" transform="rotate(45 30 30)"/>
+        <ellipse cx="30" cy="13" rx="4" ry="9" fill="#C9A84C" transform="rotate(90 30 30)"/>
+        <ellipse cx="30" cy="13" rx="4" ry="9" fill="#C9A84C" transform="rotate(135 30 30)"/>
+        <ellipse cx="30" cy="13" rx="4" ry="9" fill="#C9A84C" transform="rotate(180 30 30)"/>
+        <ellipse cx="30" cy="13" rx="4" ry="9" fill="#C9A84C" transform="rotate(225 30 30)"/>
+        <ellipse cx="30" cy="13" rx="4" ry="9" fill="#C9A84C" transform="rotate(270 30 30)"/>
+        <ellipse cx="30" cy="13" rx="4" ry="9" fill="#C9A84C" transform="rotate(315 30 30)"/>
+      </g>
+      <circle cx="30" cy="30" r="12" stroke="#C9A84C" stroke-width="0.6" fill="none" opacity="0.4"/>
+    </svg>
+    
+    <h1 style="font-family: 'Cinzel', serif; color: var(--gold); font-size: 24px; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: -0.5rem;">
+      Wisdom of the Doctors
+    </h1>
+    <p style="color: var(--text-muted); font-size: 13.5px; font-style: italic; margin-bottom: 1rem;">
+      A private, AI-powered spiritual guide seeking wisdom from the Catholic Saints and Doctors of the Church.
+    </p>
+
+    <div style="width: 100%; border-top: 1px solid var(--walnut-mid); margin: 0.5rem 0;"></div>
+
+    <p style="color: var(--vellum-dim); font-size: 15px; line-height: 1.6;">
+      Enter the interior castle. Sign in to ask questions, save your insights, and reflect on past conversations in complete privacy.
+    </p>
+
+    <button class="new-session-btn" onclick="signInWithGoogle()" style="border-color: var(--gold); color: var(--gold); font-size: 12px; padding: 12px 24px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+      <span style="font-size: 14px;">☩</span> Sign In with Google
+    </button>
+    
+    <div id="local-server-warning" style="display: none; margin-top: 1rem; padding: 8px; border: 1px solid #5a3030; border-radius: 4px; background: rgba(90,48,48,0.2); color: #c08080; font-size: 12px; line-height: 1.4;">
+      ⚠️ Local file system detected. Vercel APIs and Sign-in require running the app via <code>npx vercel dev</code>.
+    </div>
+  </div>
+</div>
+
 <!-- HEADER -->
 <header class="app-header">
   <div class="header-brand">
@@ -1083,6 +1125,7 @@ let currentUser = null;
 async function initAuth() {
   try {
     const res = await fetch('/api/config');
+    if (!res.ok) throw new Error("API config returned " + res.status);
     const config = await res.json();
     supabaseClient = supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
 
@@ -1094,6 +1137,9 @@ async function initAuth() {
     });
   } catch (e) {
     console.error("Auth init error:", e);
+    handleSessionChange(null);
+    const warning = document.getElementById('local-server-warning');
+    if (warning) warning.style.display = 'block';
   }
 }
 
@@ -1119,8 +1165,10 @@ function updateAuthUI(isLoggedIn) {
   const input = document.getElementById('chat-input');
   const sendBtn = document.getElementById('send-btn');
   const welcomeScreen = document.getElementById('welcome-screen');
+  const loginOverlay = document.getElementById('login-overlay');
 
   if (isLoggedIn) {
+    if (loginOverlay) loginOverlay.style.display = 'none';
     authSection.innerHTML = `
       <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 6px; font-style: italic; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
         Logged in as: <span style="color: var(--vellum); font-family: sans-serif;">${currentUser.email}</span>
@@ -1140,6 +1188,7 @@ function updateAuthUI(isLoggedIn) {
       if (loginTip) loginTip.remove();
     }
   } else {
+    if (loginOverlay) loginOverlay.style.display = 'flex';
     authSection.innerHTML = `
       <button class="new-session-btn" onclick="signInWithGoogle()" style="border-color: var(--gold); color: var(--gold); margin-top: 0;">
         ☩ Sign In with Google
@@ -1168,7 +1217,10 @@ function updateAuthUI(isLoggedIn) {
 }
 
 async function signInWithGoogle() {
-  if (!supabaseClient) return;
+  if (!supabaseClient) {
+    alert("Authentication client is not initialized. Please ensure the app is running via 'npx vercel dev' and has a valid connection to Supabase.");
+    return;
+  }
   await supabaseClient.auth.signInWithOAuth({
     provider: 'google',
     options: {
