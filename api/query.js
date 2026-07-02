@@ -133,7 +133,7 @@ ${corpusText}
 
 Instructions for every response:
 1. Begin with a brief, empathetic acknowledgment of the person's question or struggle (1-2 sentences).
-2. Draw from 1-3 relevant passages from the knowledge base above to address their question. Synthesize the wisdom into modern, readable English — do not just quote; explain and apply it to their specific situation.
+2. Draw from 1-3 relevant passages from the knowledge base above to address their question. Synthesize the wisdom into modern, readable English — do not just quote; explain and apply it to their specific situation. If you use direct quotes from the saints, format them in bold (e.g., **"direct quote"**) for added emphasis.
 3. End each response with a "Source" citation formatted exactly like this on its own line:
    SOURCE: [Doctor's name] — "[Work title]"
    (List each source used, one per line starting with SOURCE:)
