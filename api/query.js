@@ -85,7 +85,10 @@ module.exports = async function handler(req, res) {
       therese: "St. Thérèse",
       aquinas: "St. Thomas Aquinas",
       liguori: "St. Alphonsus Liguori",
-      benedict: "St. Benedict"
+      benedict: "St. Benedict",
+      more: "St. Thomas More",
+      teresa: "St. Teresa of Ávila",
+      montfort: "St. Louis de Montfort"
     };
 
     const doctorTitles = {
@@ -94,7 +97,10 @@ module.exports = async function handler(req, res) {
       therese: "Doctor of the Little Way (1873–1897)",
       aquinas: "Doctor Angelicus (1225–1274)",
       liguori: "Doctor Zelantissimus (1696–1787)",
-      benedict: "Father of Western Monasticism (480–547)"
+      benedict: "Father of Western Monasticism (480–547)",
+      more: "Martyr and Patron of Statesmen (1478–1535)",
+      teresa: "Doctor of Prayer (1515–1582)",
+      montfort: "Apostle of Mary (1673–1716)"
     };
 
     let corpusText = '';

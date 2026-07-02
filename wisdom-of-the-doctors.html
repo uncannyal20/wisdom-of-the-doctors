@@ -548,6 +548,9 @@
   .icon-aquinas { background: #3d2212; color: #e9c46a; }
   .icon-liguori { background: #2b1f3d; color: #b5838d; }
   .icon-benedict { background: #1f333d; color: #90be6d; }
+  .icon-more { background: #4a1a1a; color: #e9c46a; }
+  .icon-teresa { background: #3e2723; color: #ffcc80; }
+  .icon-montfort { background: #1a2d42; color: #a9cbf5; }
   .icon-sources { background: #3a2e24; color: var(--gold); }
   
   .sources-area {
@@ -693,6 +696,15 @@
       </button>
       <button class="doctor-btn" data-doctor="benedict" onclick="setDoctor(this)">
         <span class="doctor-icon icon-benedict">SB</span>St. Benedict
+      </button>
+      <button class="doctor-btn" data-doctor="more" onclick="setDoctor(this)">
+        <span class="doctor-icon icon-more">TM</span>St. Thomas More
+      </button>
+      <button class="doctor-btn" data-doctor="teresa" onclick="setDoctor(this)">
+        <span class="doctor-icon icon-teresa">TA</span>St. Teresa of Ávila
+      </button>
+      <button class="doctor-btn" data-doctor="montfort" onclick="setDoctor(this)">
+        <span class="doctor-icon icon-montfort">LM</span>St. Louis de Montfort
       </button>
       <button class="doctor-btn" id="sources-nav-btn" onclick="showPage('sources')">
         <span class="doctor-icon icon-sources">☩</span>Works Cited
@@ -843,6 +855,30 @@
         </div>
       </div>
 
+      <div class="doctor-sources-group">
+        <h3 class="doctor-sources-header">St. Thomas More</h3>
+        <div class="source-card">
+          <div class="source-card-title">Utopia & Tower Letters</div>
+          <div class="source-card-blurb">Known for his political philosophy and firm martyrdom, St. Thomas More's writings include "Utopia" (1516), detailing an ideal island society, and his letters written from the Tower of London while awaiting execution, reflecting deep trust in God amidst suffering.</div>
+        </div>
+      </div>
+
+      <div class="doctor-sources-group">
+        <h3 class="doctor-sources-header">St. Teresa of Ávila</h3>
+        <div class="source-card">
+          <div class="source-card-title">The Interior Castle & Way of Perfection</div>
+          <div class="source-card-blurb">Classic works of mystical theology and spiritual instruction. St. Teresa of Ávila guides the soul through the seven mansions of prayer toward spiritual marriage with Christ, emphasizing vocal, meditative, and contemplative prayer.</div>
+        </div>
+      </div>
+
+      <div class="doctor-sources-group">
+        <h3 class="doctor-sources-header">St. Louis de Montfort</h3>
+        <div class="source-card">
+          <div class="source-card-title">True Devotion to Mary & Secret of the Rosary</div>
+          <div class="source-card-blurb">Foundational texts of Marian spirituality. St. Louis de Montfort presents a path of total consecration to Jesus through Mary, explaining how Mary leads souls directly to her Son, and details the mysteries of the Holy Rosary.</div>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -864,7 +900,10 @@ const DOCTOR_LABELS = {
   therese: 'St. Thérèse',
   aquinas: 'St. Thomas Aquinas',
   liguori: 'St. Alphonsus Liguori',
-  benedict: 'St. Benedict'
+  benedict: 'St. Benedict',
+  more: 'St. Thomas More',
+  teresa: 'St. Teresa of Ávila',
+  montfort: 'St. Louis de Montfort'
 };
 
 
