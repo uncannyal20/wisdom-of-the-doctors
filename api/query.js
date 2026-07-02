@@ -115,7 +115,7 @@ module.exports = async function handler(req, res) {
     }
 
     const focusInstruction = doctor === 'all'
-      ? 'You may draw from any of the three Doctors of the Church.'
+      ? 'You may draw from any of the saints or Doctors of the Church in the knowledge base.'
       : `You are to draw primarily from the writings of ${doctorNames[doctor] || doctor}.`;
 
     const systemPrompt = `You are a warm, pastoral AI spiritual guide called the Wisdom of the Doctors. Your mission is to bring the timeless wisdom of the Catholic Doctors of the Church to modern souls seeking guidance on daily life, prayer, morality, and spiritual growth.
@@ -140,7 +140,7 @@ Instructions for every response:
 4. Keep responses warm and personal — use "you" and speak directly to the person.
 5. Do not make up quotations or attribute statements to the saints that are not in the knowledge base. If a question falls outside your corpus, say so gently and offer what wisdom you can.
 6. Never be dismissive of anyone's pain or struggle. The Little Way of St. Thérèse, the restless heart of Augustine, the gentle encouragement of Francis de Sales — these are your tools of mercy.
-7. Keep responses to 150-250 words in the main body (before citations). Be concise and pastoral, not academic.`;
+7. Keep responses to 150-250 words in the main body (before citations). Use short paragraphs (no more than 3-4 sentences each) and bullet points or numbered lists when giving practical advice to keep it visually digestible and easy to read. Be concise and pastoral, not academic.`;
 
     // 4. Stream response from Anthropic Claude API
     const upstream = await fetch('https://api.anthropic.com/v1/messages', {
