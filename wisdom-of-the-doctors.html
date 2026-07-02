@@ -629,6 +629,7 @@
     font-family: 'EB Garamond', Georgia, serif;
   }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -711,6 +712,12 @@
       </button>
       <button class="new-session-btn" onclick="newConversation()">+ New Conversation</button>
     </div>
+
+    <!-- AUTH SECTION -->
+    <div class="sidebar-section" id="auth-section" style="border-top: 1px solid var(--gold-dim); padding-top: 12px; margin-top: 12px; display: flex; flex-direction: column; gap: 8px;">
+      <!-- Dynamically populated -->
+    </div>
+
     <div class="saved-list">
       <div class="saved-label">Past Sessions</div>
       <div id="sessions-container">
@@ -980,10 +987,121 @@ function renderSaved() {
   // insights still saved to localStorage; sidebar now shows sessions
 }
 
+// === AUTHENTICATION ===
+let supabaseClient = null;
+let userToken = null;
+let currentUser = null;
+
+async function initAuth() {
+  try {
+    const res = await fetch('/api/config');
+    const config = await res.json();
+    supabaseClient = supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
+
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    handleSessionChange(session);
+
+    supabaseClient.auth.onAuthStateChange((event, session) => {
+      handleSessionChange(session);
+    });
+  } catch (e) {
+    console.error("Auth init error:", e);
+  }
+}
+
+function handleSessionChange(session) {
+  if (session) {
+    userToken = session.access_token;
+    currentUser = session.user;
+    updateAuthUI(true);
+    loadSessions();
+  } else {
+    userToken = null;
+    currentUser = null;
+    updateAuthUI(false);
+    document.getElementById('sessions-container').innerHTML = `
+      <p class="saved-empty">Sign in to view past conversations.</p>
+    `;
+    newConversation();
+  }
+}
+
+function updateAuthUI(isLoggedIn) {
+  const authSection = document.getElementById('auth-section');
+  const input = document.getElementById('chat-input');
+  const sendBtn = document.getElementById('send-btn');
+  const welcomeScreen = document.getElementById('welcome-screen');
+
+  if (isLoggedIn) {
+    authSection.innerHTML = `
+      <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 6px; font-style: italic; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+        Logged in as: <span style="color: var(--vellum); font-family: sans-serif;">${currentUser.email}</span>
+      </div>
+      <button class="new-session-btn" onclick="signOut()" style="border-color: #5a3030; color: #c08080; margin-top: 0;">
+        Sign Out
+      </button>
+    `;
+    input.disabled = false;
+    input.placeholder = "Bring your question, your struggle, or your prayer…";
+    sendBtn.disabled = false;
+
+    if (welcomeScreen) {
+      const chips = welcomeScreen.querySelector('.prompt-chips');
+      if (chips) chips.style.display = 'grid';
+      const loginTip = welcomeScreen.querySelector('.login-tip');
+      if (loginTip) loginTip.remove();
+    }
+  } else {
+    authSection.innerHTML = `
+      <button class="new-session-btn" onclick="signInWithGoogle()" style="border-color: var(--gold); color: var(--gold); margin-top: 0;">
+        ☩ Sign In with Google
+      </button>
+    `;
+    input.disabled = true;
+    input.placeholder = "Please sign in with Google to start chatting privately.";
+    sendBtn.disabled = true;
+
+    if (welcomeScreen) {
+      const chips = welcomeScreen.querySelector('.prompt-chips');
+      if (chips) chips.style.display = 'none';
+      if (!welcomeScreen.querySelector('.login-tip')) {
+        const loginTip = document.createElement('div');
+        loginTip.className = 'login-tip';
+        loginTip.innerHTML = `
+          <p style="margin-top: 1.5rem; color: var(--text-muted); font-size: 13px;">To ask questions and save your chats privately, please sign in.</p>
+          <button class="new-session-btn" onclick="signInWithGoogle()" style="border-color: var(--gold); color: var(--gold); width: auto; display: inline-block; padding: 8px 16px; margin-top: 10px;">
+            ☩ Sign In with Google
+          </button>
+        `;
+        welcomeScreen.appendChild(loginTip);
+      }
+    }
+  }
+}
+
+async function signInWithGoogle() {
+  if (!supabaseClient) return;
+  await supabaseClient.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: window.location.origin
+    }
+  });
+}
+
+async function signOut() {
+  if (!supabaseClient) return;
+  await supabaseClient.auth.signOut();
+}
+
 // === SESSIONS ===
 async function loadSessions() {
   try {
-    const res = await fetch('/api/sessions');
+    const headers = { 'Content-Type': 'application/json' };
+    if (userToken) {
+      headers['Authorization'] = `Bearer ${userToken}`;
+    }
+    const res = await fetch('/api/sessions', { headers });
     if (!res.ok) return;
     cachedSessions = await res.json();
     renderSessions(cachedSessions);
@@ -999,7 +1117,7 @@ function renderSessions(sessions) {
   }
   container.innerHTML = sessions.map(s => {
     const date = new Date(s.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-    const doctorShort = { all: '✦', sales: 'FS', augustine: 'SA', therese: 'ST' }[s.doctor] || '✦';
+    const doctorShort = { all: '✦', sales: 'FS', augustine: 'SA', therese: 'ST', aquinas: 'TA', liguori: 'AL', benedict: 'SB', more: 'TM', teresa: 'AV', montfort: 'LM' }[s.doctor] || '✦';
     const active = s.id === currentSessionId ? ' active' : '';
     return `<div class="session-item${active}" onclick="loadSession('${s.id}', '${s.doctor}')">
       <span class="session-title">${doctorShort} ${escHtml(s.title || 'Conversation')}</span>
@@ -1013,7 +1131,11 @@ async function loadSession(sessionId, doctor) {
   if (currentSessionId === sessionId) return;
   closeSidebar();
   try {
-    const res = await fetch(`/api/messages?session_id=${sessionId}`);
+    const headers = { 'Content-Type': 'application/json' };
+    if (userToken) {
+      headers['Authorization'] = `Bearer ${userToken}`;
+    }
+    const res = await fetch(`/api/messages?session_id=${sessionId}`, { headers });
     if (!res.ok) return;
     const msgs = await res.json();
 
@@ -1044,9 +1166,13 @@ async function loadSession(sessionId, doctor) {
 async function ensureSession(firstMessage) {
   if (currentSessionId) return;
   try {
+    const headers = { 'Content-Type': 'application/json' };
+    if (userToken) {
+      headers['Authorization'] = `Bearer ${userToken}`;
+    }
     const res = await fetch('/api/sessions', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({ doctor: currentDoctor, title: firstMessage.slice(0, 60) })
     });
     if (!res.ok) return;
@@ -1059,9 +1185,13 @@ async function ensureSession(firstMessage) {
 async function saveMessage(role, content) {
   if (!currentSessionId) return;
   try {
+    const headers = { 'Content-Type': 'application/json' };
+    if (userToken) {
+      headers['Authorization'] = `Bearer ${userToken}`;
+    }
     await fetch('/api/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({ session_id: currentSessionId, role, content })
     });
   } catch (e) { /* silent */ }
@@ -1338,7 +1468,7 @@ async function sendMessage() {
 
 // Init
 renderSaved();
-loadSessions();
+initAuth();
 
 // Register service worker
 if ('serviceWorker' in navigator) {

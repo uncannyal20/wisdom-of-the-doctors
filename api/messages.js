@@ -1,13 +1,14 @@
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
 
-const sbHeaders = {
-  'apikey': SUPABASE_ANON_KEY,
-  'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-  'Content-Type': 'application/json'
-};
-
 module.exports = async function handler(req, res) {
+  const authHeader = req.headers['authorization'] || `Bearer ${SUPABASE_ANON_KEY}`;
+  const sbHeaders = {
+    'apikey': SUPABASE_ANON_KEY,
+    'Authorization': authHeader,
+    'Content-Type': 'application/json'
+  };
+
   if (req.method === 'GET') {
     const { session_id } = req.query;
     if (!session_id) return res.status(400).json({ error: 'session_id required' });
