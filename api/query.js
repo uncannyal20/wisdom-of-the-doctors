@@ -82,13 +82,19 @@ module.exports = async function handler(req, res) {
     const doctorNames = {
       sales: "St. Francis de Sales",
       augustine: "St. Augustine",
-      therese: "St. Thérèse"
+      therese: "St. Thérèse",
+      aquinas: "St. Thomas Aquinas",
+      liguori: "St. Alphonsus Liguori",
+      benedict: "St. Benedict"
     };
 
     const doctorTitles = {
       sales: "Doctor of Devotion (1567–1622)",
       augustine: "Doctor of Grace (354–430)",
-      therese: "Doctor of the Little Way (1873–1897)"
+      therese: "Doctor of the Little Way (1873–1897)",
+      aquinas: "Doctor Angelicus (1225–1274)",
+      liguori: "Doctor Zelantissimus (1696–1787)",
+      benedict: "Father of Western Monasticism (480–547)"
     };
 
     let corpusText = '';
