@@ -51,3 +51,38 @@ as $$
   order by similarity desc
   limit match_count;
 $$;
+
+
+-- =========================================================================
+-- === PRIVATE CHATS UPDATE (GOOGLE AUTH & RLS) ===
+-- =========================================================================
+
+-- 1. Add user_id column referencing auth.users(id) to sessions
+alter table sessions 
+add column if not exists user_id uuid references auth.users(id) on delete cascade default auth.uid();
+
+-- 2. Enable Row-Level Security (RLS) on both sessions and messages tables
+alter table sessions enable row level security;
+alter table messages enable row level security;
+
+-- 3. Create RLS Policy for Sessions
+create policy "Users can manage their own sessions" 
+on sessions for all 
+to authenticated
+using (auth.uid() = user_id)
+with check (auth.uid() = user_id);
+
+-- 4. Create RLS Policy for Messages
+create policy "Users can manage messages in their own sessions"
+on messages for all
+to authenticated
+using (
+  session_id in (
+    select id from sessions where user_id = auth.uid()
+  )
+)
+with check (
+  session_id in (
+    select id from sessions where user_id = auth.uid()
+  )
+);
