@@ -1906,9 +1906,9 @@ function renderSessions(sessions) {
     const date = new Date(s.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
     const doctorShort = { all: '✦', sales: 'FS', augustine: 'SA', therese: 'ST', aquinas: 'TA', liguori: 'AL', benedict: 'SB', more: 'TM', teresa: 'AV', montfort: 'LM' }[s.doctor] || '✦';
     const active = s.id === currentSessionId ? ' active' : '';
-    const reflectionIndicator = s.summary ? ' <span style="color: var(--gold); font-size: 11px; margin-left: 4px;" title="Has Saved Reflection">📜</span>' : '';
+    const reflectionIndicator = s.summary ? ' <span style="color: var(--gold); font-size: 11px; margin: 0 4px;" title="Has Saved Reflection">📜</span>' : '';
     return `<div class="session-item${active}" onclick="loadSession('${s.id}', '${s.doctor}')">
-      <span class="session-title">${doctorShort} ${escHtml(s.title || 'Conversation')}${reflectionIndicator}</span>
+      <span class="session-title">${doctorShort}${reflectionIndicator} ${escHtml(s.title || 'Conversation')}</span>
       <span class="session-meta">${date}</span>
       <button class="session-delete-btn" onclick="event.stopPropagation(); deleteSession('${s.id}')" title="Delete conversation">×</button>
     </div>`;
