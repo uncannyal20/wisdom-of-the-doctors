@@ -55,6 +55,10 @@
     justify-content: space-between;
     height: 60px;
     flex-shrink: 0;
+    transition: margin-top 0.3s ease;
+  }
+  .app-header.hidden {
+    margin-top: -60px;
   }
   .header-brand {
     display: flex;
@@ -858,6 +862,9 @@
 </head>
 <body>
 
+<!-- HEADER TRIGGER ZONE -->
+<div id="header-trigger-zone" style="position: fixed; top: 0; left: 0; right: 0; height: 12px; z-index: 199; cursor: pointer; display: none; background: transparent; transition: background 0.2s;" onmouseover="this.style.background='rgba(201, 168, 76, 0.1)'" onmouseout="this.style.background='transparent'" onclick="showHeader()"></div>
+
 <!-- FULLSCREEN LOGIN OVERLAY -->
 <div id="login-overlay" style="display: flex; position: fixed; inset: 0; background: var(--ink); z-index: 200; align-items: center; justify-content: center; flex-direction: column; padding: 2rem; font-family: 'EB Garamond', Georgia, serif;">
   <div class="welcome-screen" style="max-width: 480px; text-align: center; border: 1px solid var(--gold-dim); padding: 3rem 2rem; border-radius: 8px; background: var(--walnut); box-shadow: 0 10px 30px rgba(0,0,0,0.6); display: flex; flex-direction: column; align-items: center; gap: 1.5rem;">
@@ -1373,6 +1380,7 @@ function renderDoctorProfiles() {
 
 // === UI HELPERS ===
 function showPage(page, updateHash = true) {
+  showHeader();
   if (page === 'chat') {
     document.querySelector('.chat-area').style.display = 'flex';
     document.getElementById('sources-area').style.display = 'none';
@@ -1431,6 +1439,28 @@ function changeFontSize(direction) {
   scale = Math.round(scale * 100) / 100;
   localStorage.setItem('font-scale', scale);
   document.documentElement.style.setProperty('--font-scale', scale);
+}
+
+function showHeader() {
+  const header = document.querySelector('.app-header');
+  if (header) {
+    header.classList.remove('hidden');
+  }
+  const triggerZone = document.getElementById('header-trigger-zone');
+  if (triggerZone) {
+    triggerZone.style.display = 'none';
+  }
+}
+
+function hideHeader() {
+  const header = document.querySelector('.app-header');
+  if (header) {
+    header.classList.add('hidden');
+  }
+  const triggerZone = document.getElementById('header-trigger-zone');
+  if (triggerZone) {
+    triggerZone.style.display = 'block';
+  }
 }
 
 function setDoctor(btn) {
@@ -2351,6 +2381,25 @@ if (initialHash === '#/sources') {
   showPage('doctors', false);
 } else {
   showPage('chat', false);
+}
+
+// Scroll detection for hiding/showing header
+let lastScrollTop = 0;
+const scrollThreshold = 15;
+const chatMessagesEl = document.getElementById('chat-messages');
+if (chatMessagesEl) {
+  chatMessagesEl.addEventListener('scroll', function() {
+    const scrollTop = this.scrollTop;
+    if (Math.abs(lastScrollTop - scrollTop) <= scrollThreshold) {
+      return;
+    }
+    if (scrollTop > lastScrollTop && scrollTop > 60) {
+      hideHeader();
+    } else if (scrollTop < lastScrollTop) {
+      showHeader();
+    }
+    lastScrollTop = scrollTop;
+  });
 }
 
 // Register service worker
