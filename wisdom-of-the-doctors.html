@@ -2482,6 +2482,9 @@ async function saveReflection() {
     const s = cachedSessions.find(x => x.id === currentSessionId);
     if (s) s.summary = lastGeneratedSummary;
     
+    // Re-render sidebar sessions to show the gold scroll icon (📜) immediately
+    renderSessions(cachedSessions);
+    
     if (btn) {
       btn.textContent = "✦ Saved";
     }
@@ -2529,6 +2532,47 @@ function parseMarkdown(md) {
     .replace(/<p><\/p>/g, '');
 }
 
+function runReflectionTest() {
+  console.log("=== RUNNING CLIENT-SIDE REFLECTION INDICATOR TESTS ===");
+  const originalSessions = [...cachedSessions];
+  
+  const testSessionId = "test-reflection-id-123";
+  const mockSession = {
+    id: testSessionId,
+    created_at: new Date().toISOString(),
+    doctor: "all",
+    title: "Test Reflection Session",
+    summary: "This is a mock reflection summary for testing."
+  };
+  
+  cachedSessions.unshift(mockSession);
+  renderSessions(cachedSessions);
+  
+  const sessionItems = document.querySelectorAll('.session-item');
+  let testItemFound = false;
+  let hasIcon = false;
+  
+  sessionItems.forEach(item => {
+    if (item.getAttribute('onclick') && item.getAttribute('onclick').includes(testSessionId)) {
+      testItemFound = true;
+      if (item.innerHTML.includes('📜')) {
+        hasIcon = true;
+      }
+    }
+  });
+  
+  cachedSessions = originalSessions;
+  renderSessions(cachedSessions);
+  
+  if (testItemFound && hasIcon) {
+    console.log("✅ TEST PASSED: Reflection indicator (📜) renders correctly in the session list!");
+    alert("✅ TEST PASSED: Reflection indicator (📜) renders correctly in the session list!");
+  } else {
+    console.error("❌ TEST FAILED: Test session was either not rendered, or missing the scroll icon.");
+    alert("❌ TEST FAILED: Test session was either not rendered, or missing the scroll icon.");
+  }
+}
+
 // Init
 const savedScale = localStorage.getItem('font-scale') || '1.05';
 document.documentElement.style.setProperty('--font-scale', savedScale);
@@ -2552,6 +2596,10 @@ if (initialHash === '#/sources') {
   showPage('doctors', false);
 } else {
   showPage('chat', false);
+}
+
+if (window.location.search.includes('test=true')) {
+  setTimeout(runReflectionTest, 1000);
 }
 
 // Scroll detection for hiding/showing header
