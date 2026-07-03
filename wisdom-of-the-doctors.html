@@ -53,6 +53,8 @@
     display: flex;
     align-items: center;
     gap: 12px;
+    cursor: pointer;
+    user-select: none;
   }
   .rose-window {
     width: 36px;
@@ -893,7 +895,7 @@
 
 <!-- HEADER -->
 <header class="app-header">
-  <div class="header-brand">
+  <div class="header-brand" onclick="showPage('chat')">
     <svg class="rose-window" id="main-rose" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
       <circle cx="18" cy="18" r="17" stroke="#C9A84C" stroke-width="0.8" fill="none"/>
       <circle cx="18" cy="18" r="3" fill="#C9A84C" opacity="0.9"/>
