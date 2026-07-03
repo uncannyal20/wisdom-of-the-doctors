@@ -123,6 +123,8 @@ create table corpus (
 11. **Complete Corpus RAG Ingestion & Database RLS Lockdown:** Uploaded all seed files (36 seed passages + 6 custom files) in `corpus/` with Gemini embeddings, then locked down the Supabase `corpus` table with a public read-only RLS policy.
 12. **Installable PWA Support (Chrome/Safari):** Configured full Web App Manifest, registered a standard Service Worker with offline assets caching, and generated high-resolution 192x192 and 512x512 PNG icons from the original SVG vector to trigger native mobile install prompts (e.g. Chrome's "Add to Home Screen").
 13. **Randomized Saint Welcome Quotes:** Implemented a selection of 10 curated, authentic spiritual quotes from St. Augustine, St. Teresa of Ávila, St. Francis de Sales, St. Alphonsus Liguori, and St. Louis de Montfort. The landing page welcome screen dynamically randomizes the active quote on app startup and whenever a new conversation session is initialized.
+14. **Draggable Preference Panel:** Refactored the text-size floating panel into a draggable overlay. Users can click-and-drag or touch-and-drag the circular **A** handle to position it anywhere on their screen. The position is bound to the viewport and saved in `localStorage` to persist across reloads, preventing it from obstructing input elements or text.
+15. **Light Parchment Theme Switcher:** Implemented a new, high-contrast light vellum theme reversing the CSS custom properties to present a warm, paper-like background with dark walnut-brown typography and soft sepia highlights. The toggle button (`🌓`) is integrated inside the expanded preferences panel and saved to `localStorage`.
 
 ---
 
