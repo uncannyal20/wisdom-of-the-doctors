@@ -2779,6 +2779,14 @@ const chatMessagesEl = document.getElementById('chat-messages');
 if (chatMessagesEl) {
   chatMessagesEl.addEventListener('scroll', function() {
     if (disableScrollSpy) return;
+    // Disable scroll spy header toggling on desktop viewports (width > 640px)
+    if (window.innerWidth > 640) {
+      const header = document.querySelector('.app-header');
+      if (header && header.classList.contains('hidden')) {
+        showHeader();
+      }
+      return;
+    }
     const scrollTop = this.scrollTop;
     if (Math.abs(lastScrollTop - scrollTop) <= scrollThreshold) {
       return;
