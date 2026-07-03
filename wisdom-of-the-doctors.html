@@ -328,12 +328,12 @@
     border-color: var(--vellum);
     color: var(--ink);
   }
-  .signout-btn {
+  .signout-btn, .delete-btn {
     background: #7a3232 !important;
     border-color: #7a3232 !important;
     color: #faf6ee !important;
   }
-  .signout-btn:hover {
+  .signout-btn:hover, .delete-btn:hover {
     background: #9a4242 !important;
     border-color: #9a4242 !important;
     color: #ffffff !important;
@@ -1864,10 +1864,10 @@ function showSavedInsight(idx) {
       ${insight.content}
     </div>
     <div style="display: flex; justify-content: center; margin-top: 2rem; gap: 12px;">
-      <button class="new-session-btn" onclick="deleteSavedInsight(${idx}, '${insight.id}')" style="width: auto; padding: 6px 16px; border-color: #5a3030; color: #c08080; font-size: 11px;">
+      <button class="new-session-btn delete-btn" onclick="deleteSavedInsight(${idx}, '${insight.id}')" style="width: auto; padding: 6px 16px; font-size: 11px;">
         Delete Insight
       </button>
-      <button class="new-session-btn" onclick="closeSummaryModal()" style="width: auto; padding: 6px 20px; border-color: var(--gold); color: var(--gold); font-size: 11px;">
+      <button class="new-session-btn" onclick="closeSummaryModal()" style="width: auto; padding: 6px 20px; font-size: 11px;">
         Close
       </button>
     </div>
@@ -2520,10 +2520,10 @@ async function generateSummary() {
       </h2>
       <div class="reflection-body">${parseMarkdown(currentSession.summary)}</div>
       <div style="display: flex; justify-content: center; margin-top: 1.5rem; gap: 12px;">
-        <button class="new-session-btn" onclick="regenerateSummary()" style="width: auto; padding: 6px 16px; border-color: var(--gold-dim); color: var(--gold-dim); font-size: 11px;">
+        <button class="new-session-btn" onclick="regenerateSummary()" style="width: auto; padding: 6px 16px; font-size: 11px;">
           ⟳ Regenerate
         </button>
-        <button class="new-session-btn" onclick="closeSummaryModal()" style="width: auto; padding: 6px 20px; border-color: var(--gold); color: var(--gold); font-size: 11px;">
+        <button class="new-session-btn" onclick="closeSummaryModal()" style="width: auto; padding: 6px 20px; font-size: 11px;">
           Amen
         </button>
       </div>
@@ -2589,7 +2589,7 @@ async function generateSummary() {
       </h2>
       <p style="text-align: center; margin-top: 1rem; color: var(--vellum-dim);">${escHtml(e.message)}</p>
       <div style="display: flex; justify-content: center; margin-top: 1.5rem;">
-        <button class="new-session-btn" onclick="closeSummaryModal()" style="width: auto; padding: 6px 16px; border-color: #5a3030; color: #c08080;">
+        <button class="new-session-btn delete-btn" onclick="closeSummaryModal()" style="width: auto; padding: 6px 16px;">
           Close
         </button>
       </div>
