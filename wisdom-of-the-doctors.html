@@ -1041,7 +1041,7 @@ let currentDoctor = 'all';
 let currentSessionId = null;
 let cachedSessions = [];
 let conversationHistory = [];
-let savedInsights = JSON.parse(localStorage.getItem('wod_insights') || '[]');
+let savedInsights = [];
 let isLoading = false;
 
 // === DOCTOR LABELS ===
@@ -1120,25 +1120,53 @@ function setLoading(val) {
 }
 
 // === SAVE INSIGHTS ===
-function saveInsight(text, doctor) {
-  const snippet = text.replace(/<[^>]+>/g, '').slice(0, 80) + '…';
-  savedInsights.unshift({ snippet, doctor, full: text, time: Date.now() });
-  if (savedInsights.length > 20) savedInsights.pop();
-  localStorage.setItem('wod_insights', JSON.stringify(savedInsights));
-  renderSaved();
+async function loadInsights() {
+  try {
+    const headers = { 'Content-Type': 'application/json' };
+    if (userToken) {
+      headers['Authorization'] = `Bearer ${userToken}`;
+    }
+    const res = await fetch('/api/insights', { headers });
+    if (!res.ok) return;
+    savedInsights = await res.json();
+    renderSaved();
+  } catch (e) { /* silent */ }
+}
+
+async function saveInsight(text, doctor) {
+  try {
+    const headers = { 'Content-Type': 'application/json' };
+    if (userToken) {
+      headers['Authorization'] = `Bearer ${userToken}`;
+    }
+    const res = await fetch('/api/insights', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        session_id: currentSessionId,
+        doctor,
+        content: text
+      })
+    });
+    if (!res.ok) return;
+    const newInsight = await res.json();
+    savedInsights.unshift(newInsight);
+    renderSaved();
+  } catch (e) { /* silent */ }
 }
 
 function renderSaved() {
   const container = document.getElementById('insights-container');
   if (!container) return;
-  if (savedInsights.length === 0) {
+  if (!savedInsights || savedInsights.length === 0) {
     container.innerHTML = `<p class="saved-empty">Saved insights will appear here.</p>`;
     return;
   }
   container.innerHTML = savedInsights.map((insight, idx) => {
+    const snippet = insight.content.replace(/<[^>]+>/g, '').slice(0, 80) + '…';
     return `<div class="saved-item" onclick="showSavedInsight(${idx})" style="padding: 8px 10px; font-size: 12px; margin-bottom: 4px; border-radius: 4px; cursor: pointer; transition: background 0.15s; line-height: 1.4; border: 1px solid transparent; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">
       <strong style="color: var(--gold); display: block; font-size: 9px; text-transform: uppercase; letter-spacing: 0.05em; font-family: 'Cinzel', serif; margin-bottom: 2px;">${escHtml(insight.doctor)}</strong>
-      <span style="color: var(--vellum-dim); font-size: 11.5px; font-style: italic;">"${escHtml(insight.snippet)}"</span>
+      <span style="color: var(--vellum-dim); font-size: 11.5px; font-style: italic;">"${escHtml(snippet)}"</span>
     </div>`;
   }).join('');
 }
@@ -1159,10 +1187,10 @@ function showSavedInsight(idx) {
       Counsel from ${escHtml(insight.doctor)}
     </div>
     <div class="reflection-body" style="font-family: 'EB Garamond', Georgia, serif; line-height: 1.7; color: var(--vellum); font-size: 15.5px;">
-      ${insight.full}
+      ${insight.content}
     </div>
     <div style="display: flex; justify-content: center; margin-top: 2rem; gap: 12px;">
-      <button class="new-session-btn" onclick="deleteSavedInsight(${idx})" style="width: auto; padding: 6px 16px; border-color: #5a3030; color: #c08080; font-size: 11px;">
+      <button class="new-session-btn" onclick="deleteSavedInsight(${idx}, '${insight.id}')" style="width: auto; padding: 6px 16px; border-color: #5a3030; color: #c08080; font-size: 11px;">
         Delete Insight
       </button>
       <button class="new-session-btn" onclick="closeSummaryModal()" style="width: auto; padding: 6px 20px; border-color: var(--gold); color: var(--gold); font-size: 11px;">
@@ -1173,12 +1201,22 @@ function showSavedInsight(idx) {
   backdrop.style.display = 'flex';
 }
 
-function deleteSavedInsight(idx) {
+async function deleteSavedInsight(idx, id) {
   if (confirm("Are you sure you want to remove this saved insight?")) {
-    savedInsights.splice(idx, 1);
-    localStorage.setItem('wod_insights', JSON.stringify(savedInsights));
-    renderSaved();
-    closeSummaryModal();
+    try {
+      const headers = { 'Content-Type': 'application/json' };
+      if (userToken) {
+        headers['Authorization'] = `Bearer ${userToken}`;
+      }
+      const res = await fetch(`/api/insights?id=${id}`, {
+        method: 'DELETE',
+        headers
+      });
+      if (!res.ok) return;
+      savedInsights.splice(idx, 1);
+      renderSaved();
+      closeSummaryModal();
+    } catch (e) { /* silent */ }
   }
 }
 
@@ -1217,6 +1255,7 @@ function handleSessionChange(session) {
     currentUser = session.user;
     updateAuthUI(true);
     loadSessions();
+    loadInsights();
   } else {
     userToken = null;
     currentUser = null;
@@ -1224,6 +1263,10 @@ function handleSessionChange(session) {
     document.getElementById('sessions-container').innerHTML = `
       <p class="saved-empty">Sign in to view past conversations.</p>
     `;
+    document.getElementById('insights-container').innerHTML = `
+      <p class="saved-empty">Sign in to view saved insights.</p>
+    `;
+    savedInsights = [];
     newConversation();
   }
 }

@@ -86,3 +86,27 @@ with check (
     select id from sessions where user_id = auth.uid()
   )
 );
+
+-- =========================================================================
+-- === INSIGHTS TABLE UPDATE ===
+-- =========================================================================
+
+-- 1. Create insights table
+create table if not exists insights (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references auth.users(id) on delete cascade default auth.uid(),
+  session_id uuid references sessions(id) on delete cascade,
+  doctor text not null,
+  content text not null, -- full decrypted text
+  created_at timestamp with time zone default now()
+);
+
+-- 2. Enable Row-Level Security (RLS) on insights table
+alter table insights enable row level security;
+
+-- 3. Create RLS Policy for Insights
+create policy "Users can manage their own insights" 
+on insights for all 
+to authenticated
+using (auth.uid() = user_id)
+with check (auth.uid() = user_id);
