@@ -310,19 +310,34 @@
   .save-btn-small:hover { color: var(--gold); }
   .new-session-btn {
     width: 100%;
-    padding: 6px 10px;
-    background: transparent;
-    border: 1px solid var(--gold-dim);
+    padding: 7px 10px;
+    background: var(--gold);
+    border: 1px solid var(--gold);
     border-radius: 6px;
-    color: var(--gold-dim);
+    color: var(--ink);
     font-family: 'Cinzel', serif;
-    font-size: 10px;
+    font-size: 10.5px;
+    font-weight: 600;
     letter-spacing: 0.08em;
     cursor: pointer;
     margin-top: 8px;
     transition: all 0.15s;
   }
-  .new-session-btn:hover { border-color: var(--gold); color: var(--gold); background: var(--walnut-mid); }
+  .new-session-btn:hover {
+    background: var(--vellum);
+    border-color: var(--vellum);
+    color: var(--ink);
+  }
+  .signout-btn {
+    background: #7a3232 !important;
+    border-color: #7a3232 !important;
+    color: #faf6ee !important;
+  }
+  .signout-btn:hover {
+    background: #9a4242 !important;
+    border-color: #9a4242 !important;
+    color: #ffffff !important;
+  }
   .session-item {
     padding: 7px 24px 7px 8px; /* leave space for delete button */
     border-left: 2px solid var(--gold-dim);
@@ -1943,7 +1958,7 @@ function updateAuthUI(isLoggedIn) {
       <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 6px; font-style: italic; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
         Logged in as: <span style="color: var(--vellum); font-family: sans-serif;">${currentUser.email}</span>
       </div>
-      <button class="new-session-btn" onclick="signOut()" style="border-color: #5a3030; color: #c08080; margin-top: 0;">
+      <button class="new-session-btn signout-btn" onclick="signOut()" style="margin-top: 0;">
         Sign Out
       </button>
     `;
