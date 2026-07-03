@@ -1560,7 +1560,7 @@ function showSavedInsight(idx) {
       </button>
     </div>
   `;
-  backdrop.style.display = 'flex';
+  openSummaryModal();
 }
 
 async function deleteSavedInsight(idx, id) {
@@ -2018,17 +2018,45 @@ function escHtml(str) {
 }
 
 // === MOBILE SIDEBAR ===
-function toggleSidebar() {
+function toggleSidebar(updateHash = true) {
+  const sidebar = document.querySelector('.sidebar');
+  const backdrop = document.getElementById('sidebar-backdrop');
   if (window.innerWidth <= 640) {
-    document.querySelector('.sidebar').classList.toggle('open');
-    document.getElementById('sidebar-backdrop').classList.toggle('visible');
+    const isOpening = !sidebar.classList.contains('open');
+    sidebar.classList.toggle('open');
+    backdrop.classList.toggle('visible');
+    
+    if (updateHash) {
+      if (isOpening) {
+        window.location.hash = '#/menu';
+      } else {
+        if (window.location.hash === '#/menu') {
+          // Revert to current page state hash
+          const activeBtn = document.querySelector('#sources-nav-btn.active') || document.querySelector('#doctor-who-btn.active');
+          if (activeBtn) {
+            window.location.hash = '#/' + (activeBtn.id === 'sources-nav-btn' ? 'sources' : 'doctors');
+          } else {
+            window.location.hash = '';
+          }
+        }
+      }
+    }
   } else {
-    document.querySelector('.sidebar').classList.toggle('collapsed');
+    sidebar.classList.toggle('collapsed');
   }
 }
-function closeSidebar() {
+function closeSidebar(updateHash = true) {
   document.querySelector('.sidebar').classList.remove('open');
   document.getElementById('sidebar-backdrop').classList.remove('visible');
+  
+  if (updateHash && window.location.hash === '#/menu') {
+    const activeBtn = document.querySelector('#sources-nav-btn.active') || document.querySelector('#doctor-who-btn.active');
+    if (activeBtn) {
+      window.location.hash = '#/' + (activeBtn.id === 'sources-nav-btn' ? 'sources' : 'doctors');
+    } else {
+      window.location.hash = '';
+    }
+  }
 }
 
 // === MAIN SEND (streaming) ===
@@ -2170,7 +2198,7 @@ async function generateSummary() {
         </button>
       </div>
     `;
-    backdrop.style.display = 'flex';
+    openSummaryModal();
     return;
   }
 
@@ -2186,7 +2214,7 @@ async function generateSummary() {
     </div>
     <p style="text-align: center; font-style: italic; color: var(--text-muted); font-size: 13.5px;">The Guide is reflecting on your journey and harvesting key teachings...</p>
   `;
-  backdrop.style.display = 'flex';
+  openSummaryModal();
   
   try {
     const headers = { 'Content-Type': 'application/json' };
@@ -2279,8 +2307,21 @@ async function regenerateSummary() {
   await generateSummary();
 }
 
-function closeSummaryModal() {
+function openSummaryModal() {
+  document.getElementById('modal-backdrop').style.display = 'flex';
+  window.location.hash = '#/modal';
+}
+
+function closeSummaryModal(updateHash = true) {
   document.getElementById('modal-backdrop').style.display = 'none';
+  if (updateHash && window.location.hash === '#/modal') {
+    const activeBtn = document.querySelector('#sources-nav-btn.active') || document.querySelector('#doctor-who-btn.active');
+    if (activeBtn) {
+      window.location.hash = '#/' + (activeBtn.id === 'sources-nav-btn' ? 'sources' : 'doctors');
+    } else {
+      window.location.hash = '';
+    }
+  }
 }
 
 function parseMarkdown(md) {
