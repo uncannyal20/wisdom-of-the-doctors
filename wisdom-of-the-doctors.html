@@ -2118,12 +2118,20 @@ async function loadSession(sessionId, doctor) {
     document.getElementById('footer-badge').textContent = label;
 
     // Re-render chat
-    document.getElementById('chat-messages').innerHTML = '';
+    disableScrollSpy = true;
+    const chatMsgEl = document.getElementById('chat-messages');
+    chatMsgEl.innerHTML = '';
     msgs.forEach(m => {
       conversationHistory.push({ role: m.role, content: m.content });
-      if (m.role === 'user') addUserMessage(m.content);
-      else addAIMessage(m.content);
+      if (m.role === 'user') addUserMessage(m.content, true);
+      else addAIMessage(m.content, true);
     });
+
+    scrollToBottom();
+    lastScrollTop = chatMsgEl.scrollTop;
+    setTimeout(() => {
+      disableScrollSpy = false;
+    }, 150);
 
     renderSessions(cachedSessions);
   } catch (e) { /* silent */ }
@@ -2220,7 +2228,7 @@ function newConversation() {
 }
 
 // === MESSAGE RENDERING ===
-function addUserMessage(text) {
+function addUserMessage(text, skipScroll = false) {
   hideWelcome();
   const messages = document.getElementById('chat-messages');
   const div = document.createElement('div');
@@ -2230,7 +2238,7 @@ function addUserMessage(text) {
     <div class="msg-bubble">${escHtml(text)}</div>
   `;
   messages.appendChild(div);
-  scrollToBottom();
+  if (!skipScroll) scrollToBottom();
 }
 
 function addTypingIndicator() {
@@ -2314,10 +2322,10 @@ function toggleCitations(id, btn) {
   }
 }
 
-function addAIMessage(raw) {
+function addAIMessage(raw, skipScroll = false) {
   const { mainText, sources } = parseResponse(raw);
   const messages = document.getElementById('chat-messages');
-  const msgId = 'msg-' + Date.now();
+  const msgId = 'msg-' + Date.now() + '-' + Math.floor(Math.random() * 10000);
   const doctorLabel = DOCTOR_LABELS[currentDoctor];
 
   const citationsHtml = buildCitationsHtml(sources);
@@ -2339,7 +2347,7 @@ function addAIMessage(raw) {
     </div>
   `;
   messages.appendChild(div);
-  scrollToBottom();
+  if (!skipScroll) scrollToBottom();
 }
 
 function handleSave(btn, msgId) {
@@ -2765,10 +2773,12 @@ if (window.location.search.includes('test=true')) {
 
 // Scroll detection for hiding/showing header
 let lastScrollTop = 0;
+let disableScrollSpy = false;
 const scrollThreshold = 15;
 const chatMessagesEl = document.getElementById('chat-messages');
 if (chatMessagesEl) {
   chatMessagesEl.addEventListener('scroll', function() {
+    if (disableScrollSpy) return;
     const scrollTop = this.scrollTop;
     if (Math.abs(lastScrollTop - scrollTop) <= scrollThreshold) {
       return;
