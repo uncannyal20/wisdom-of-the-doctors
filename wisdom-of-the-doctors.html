@@ -27,6 +27,7 @@
     --earth-dim: #4A2B1A;
     --parchment: #EDD9B0;
     --text-muted: #A08060;
+    --quote-color: #C9A84C;
     
     /* Font Scaling variables (Default scale set to 1.05 for enhanced initial readability) */
     --font-scale: 1.05;
@@ -49,6 +50,7 @@
     --earth-dim: #F3EBDD;
     --parchment: #2D1C10;
     --text-muted: #7E634B;
+    --quote-color: #8C6527;
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { height: 100%; overflow: hidden; }
@@ -495,7 +497,7 @@
   .msg-bubble strong { color: var(--gold); font-weight: 500; }
   .msg-bubble em {
     font-style: italic;
-    color: #C9A84C; /* Using the gold accent for quotes to add warmth */
+    color: var(--quote-color);
   }
   .msg-footer {
     display: flex;
@@ -1615,8 +1617,8 @@ function makeDraggable(el, handle) {
   let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
   let dragDistance = 0;
   
-  handle.onmousedown = dragMouseDown;
-  handle.ontouchstart = dragTouchStart;
+  handle.addEventListener('mousedown', dragMouseDown);
+  handle.addEventListener('touchstart', dragTouchStart, { passive: false });
   
   function dragMouseDown(e) {
     e = e || window.event;
@@ -1624,16 +1626,18 @@ function makeDraggable(el, handle) {
     dragDistance = 0;
     pos3 = e.clientX;
     pos4 = e.clientY;
-    document.onmouseup = closeDragElement;
-    document.onmousemove = elementDrag;
+    document.addEventListener('mouseup', closeDragElement);
+    document.addEventListener('mousemove', elementDrag, { passive: false });
   }
   
   function dragTouchStart(e) {
+    // Prevent default scrolling behaviour while interacting with handle
+    e.preventDefault();
     dragDistance = 0;
     pos3 = e.touches[0].clientX;
     pos4 = e.touches[0].clientY;
-    document.ontouchend = closeDragElement;
-    document.ontouchmove = elementTouchDrag;
+    document.addEventListener('touchend', closeDragElement);
+    document.addEventListener('touchmove', elementTouchDrag, { passive: false });
   }
   
   function elementDrag(e) {
@@ -1659,6 +1663,8 @@ function makeDraggable(el, handle) {
   }
   
   function elementTouchDrag(e) {
+    // Prevent scrolling while dragging the preference panel
+    e.preventDefault();
     pos1 = pos3 - e.touches[0].clientX;
     pos2 = pos4 - e.touches[0].clientY;
     pos3 = e.touches[0].clientX;
@@ -1679,10 +1685,10 @@ function makeDraggable(el, handle) {
   }
   
   function closeDragElement(e) {
-    document.onmouseup = null;
-    document.onmousemove = null;
-    document.ontouchend = null;
-    document.ontouchmove = null;
+    document.removeEventListener('mouseup', closeDragElement);
+    document.removeEventListener('mousemove', elementDrag);
+    document.removeEventListener('touchend', closeDragElement);
+    document.removeEventListener('touchmove', elementTouchDrag);
     
     localStorage.setItem('font-panel-top', el.style.top);
     localStorage.setItem('font-panel-left', el.style.left);
