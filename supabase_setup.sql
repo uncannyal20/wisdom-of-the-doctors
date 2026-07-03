@@ -110,3 +110,6 @@ on insights for all
 to authenticated
 using (auth.uid() = user_id)
 with check (auth.uid() = user_id);
+
+-- 4. Add summary column to sessions table
+alter table sessions add column if not exists summary text;

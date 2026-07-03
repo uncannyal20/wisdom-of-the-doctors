@@ -1844,12 +1844,36 @@ async function sendMessage() {
   }
 }
 
+let lastGeneratedSummary = null;
+
 async function generateSummary() {
   if (!currentSessionId) return;
   
   const backdrop = document.getElementById('modal-backdrop');
   const content = document.getElementById('modal-content');
   
+  // 1. Check if we already have a saved summary in local session cache
+  const currentSession = cachedSessions.find(s => s.id === currentSessionId);
+  if (currentSession && currentSession.summary) {
+    lastGeneratedSummary = currentSession.summary;
+    content.innerHTML = `
+      <h2 style="font-family: 'Cinzel', serif; color: var(--gold); font-size: 17px; text-align: center; margin-top: 0.5rem; margin-bottom: 1.5rem; letter-spacing: 0.08em; text-transform: uppercase; border-bottom: 1px double var(--gold-dim); padding-bottom: 8px;">
+        ☩ Spiritual Reflection ☩
+      </h2>
+      <div class="reflection-body">${parseMarkdown(currentSession.summary)}</div>
+      <div style="display: flex; justify-content: center; margin-top: 1.5rem; gap: 12px;">
+        <button class="new-session-btn" onclick="regenerateSummary()" style="width: auto; padding: 6px 16px; border-color: var(--gold-dim); color: var(--gold-dim); font-size: 11px;">
+          ⟳ Regenerate
+        </button>
+        <button class="new-session-btn" onclick="closeSummaryModal()" style="width: auto; padding: 6px 20px; border-color: var(--gold); color: var(--gold); font-size: 11px;">
+          Amen
+        </button>
+      </div>
+    `;
+    backdrop.style.display = 'flex';
+    return;
+  }
+
   // Show loading state
   content.innerHTML = `
     <h2 style="font-family: 'Cinzel', serif; color: var(--gold); font-size: 17px; text-align: center; margin-top: 1rem; letter-spacing: 0.08em; text-transform: uppercase;">
@@ -1884,14 +1908,18 @@ async function generateSummary() {
     }
     
     const data = await res.json();
+    lastGeneratedSummary = data.summary;
     
     content.innerHTML = `
       <h2 style="font-family: 'Cinzel', serif; color: var(--gold); font-size: 17px; text-align: center; margin-top: 0.5rem; margin-bottom: 1.5rem; letter-spacing: 0.08em; text-transform: uppercase; border-bottom: 1px double var(--gold-dim); padding-bottom: 8px;">
         ☩ Journey takeaways ☩
       </h2>
       <div class="reflection-body">${parseMarkdown(data.summary)}</div>
-      <div style="display: flex; justify-content: center; margin-top: 1.5rem;">
-        <button class="new-session-btn" onclick="closeSummaryModal()" style="width: auto; padding: 8px 24px; border-color: var(--gold); color: var(--gold);">
+      <div style="display: flex; justify-content: center; margin-top: 1.5rem; gap: 12px;">
+        <button class="new-session-btn" id="save-reflection-btn" onclick="saveReflection()" style="width: auto; padding: 6px 16px; border-color: var(--gold); color: var(--gold); font-size: 11px;">
+          ✦ Save Reflection
+        </button>
+        <button class="new-session-btn" onclick="closeSummaryModal()" style="width: auto; padding: 6px 20px; border-color: var(--gold-dim); color: var(--gold-dim); font-size: 11px;">
           Amen
         </button>
       </div>
@@ -1909,6 +1937,46 @@ async function generateSummary() {
       </div>
     `;
   }
+}
+
+async function saveReflection() {
+  if (!currentSessionId || !lastGeneratedSummary) return;
+  const btn = document.getElementById('save-reflection-btn');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = "Saving...";
+  }
+  try {
+    const headers = { 'Content-Type': 'application/json' };
+    if (userToken) {
+      headers['Authorization'] = `Bearer ${userToken}`;
+    }
+    const res = await fetch(`/api/sessions?id=${currentSessionId}`, {
+      method: 'PATCH',
+      headers,
+      body: JSON.stringify({ summary: lastGeneratedSummary })
+    });
+    if (!res.ok) throw new Error("Failed to save summary");
+    
+    // Update local cache
+    const s = cachedSessions.find(x => x.id === currentSessionId);
+    if (s) s.summary = lastGeneratedSummary;
+    
+    if (btn) {
+      btn.textContent = "✦ Saved";
+    }
+  } catch (e) {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = "Error saving";
+    }
+  }
+}
+
+async function regenerateSummary() {
+  const s = cachedSessions.find(x => x.id === currentSessionId);
+  if (s) s.summary = null;
+  await generateSummary();
 }
 
 function closeSummaryModal() {

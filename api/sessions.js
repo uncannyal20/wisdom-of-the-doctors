@@ -18,7 +18,8 @@ module.exports = async function handler(req, res) {
     const data = await r.json();
     const decryptedData = Array.isArray(data) ? data.map(s => ({
       ...s,
-      title: decrypt(s.title)
+      title: decrypt(s.title),
+      summary: s.summary ? decrypt(s.summary) : null
     })) : data;
     return res.status(r.ok ? 200 : r.status).json(decryptedData);
   }
@@ -37,6 +38,29 @@ module.exports = async function handler(req, res) {
       returnedData.title = decrypt(returnedData.title);
     }
     return res.status(r.ok ? 201 : r.status).json(returnedData);
+  }
+
+  if (req.method === 'PATCH') {
+    const { id } = req.query;
+    const { summary } = req.body;
+    if (!id || !summary) {
+      return res.status(400).json({ error: 'id and summary required' });
+    }
+    try {
+      const encryptedSummary = encrypt(summary);
+      const r = await fetch(`${SUPABASE_URL}/rest/v1/sessions?id=eq.${id}`, {
+        method: 'PATCH',
+        headers: { ...sbHeaders, 'Prefer': 'return=representation' },
+        body: JSON.stringify({ summary: encryptedSummary })
+      });
+      if (!r.ok) {
+        const errText = await r.text();
+        return res.status(r.status).json({ error: `Supabase error: ${errText}` });
+      }
+      return res.status(200).json({ success: true });
+    } catch (err) {
+      return res.status(500).json({ error: err.message });
+    }
   }
 
   if (req.method === 'DELETE') {
