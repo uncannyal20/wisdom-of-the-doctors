@@ -257,15 +257,40 @@
   }
   .new-session-btn:hover { border-color: var(--gold); color: var(--gold); background: var(--walnut-mid); }
   .session-item {
-    padding: 7px 8px;
+    padding: 7px 24px 7px 8px; /* leave space for delete button */
     border-left: 2px solid var(--gold-dim);
     margin-bottom: 6px;
     cursor: pointer;
     transition: all 0.1s;
     border-radius: 0 4px 4px 0;
+    position: relative;
   }
   .session-item:hover { background: var(--walnut-mid); }
   .session-item.active { border-left-color: var(--gold); background: var(--walnut-mid); }
+  .session-delete-btn {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: #806060;
+    font-size: 14px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.15s, color 0.15s;
+    padding: 0 4px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .session-item:hover .session-delete-btn {
+    opacity: 1;
+  }
+  .session-delete-btn:hover {
+    color: #c08080;
+  }
   .session-title {
     display: block;
     font-size: 12px;
@@ -1373,8 +1398,38 @@ function renderSessions(sessions) {
     return `<div class="session-item${active}" onclick="loadSession('${s.id}', '${s.doctor}')">
       <span class="session-title">${doctorShort} ${escHtml(s.title || 'Conversation')}</span>
       <span class="session-meta">${date}</span>
+      <button class="session-delete-btn" onclick="event.stopPropagation(); deleteSession('${s.id}')" title="Delete conversation">×</button>
     </div>`;
   }).join('');
+}
+
+async function deleteSession(sessionId) {
+  if (!confirm("Are you sure you want to delete this conversation? This will permanently remove all messages and saved insights associated with it.")) {
+    return;
+  }
+  try {
+    const headers = { 'Content-Type': 'application/json' };
+    if (userToken) {
+      headers['Authorization'] = `Bearer ${userToken}`;
+    }
+    const res = await fetch(`/api/sessions?id=${sessionId}`, {
+      method: 'DELETE',
+      headers
+    });
+    if (!res.ok) return;
+
+    // Remove from local list and UI
+    cachedSessions = cachedSessions.filter(s => s.id !== sessionId);
+    renderSessions(cachedSessions);
+
+    // If we deleted the currently active conversation, reset the chat area
+    if (currentSessionId === sessionId) {
+      newConversation();
+    }
+    
+    // Refresh insights as they might have cascaded deleted
+    loadInsights();
+  } catch (e) { /* silent */ }
 }
 
 async function loadSession(sessionId, doctor) {

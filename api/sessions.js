@@ -39,5 +39,25 @@ module.exports = async function handler(req, res) {
     return res.status(r.ok ? 201 : r.status).json(returnedData);
   }
 
+  if (req.method === 'DELETE') {
+    const { id } = req.query;
+    if (!id) {
+      return res.status(400).json({ error: 'id required' });
+    }
+    try {
+      const r = await fetch(`${SUPABASE_URL}/rest/v1/sessions?id=eq.${id}`, {
+        method: 'DELETE',
+        headers: sbHeaders
+      });
+      if (!r.ok) {
+        const errText = await r.text();
+        return res.status(r.status).json({ error: `Supabase error: ${errText}` });
+      }
+      return res.status(200).json({ success: true });
+    } catch (err) {
+      return res.status(500).json({ error: err.message });
+    }
+  }
+
   return res.status(405).json({ error: 'Method not allowed' });
 };
