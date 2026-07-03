@@ -872,9 +872,14 @@
     <div class="sidebar-content">
       <div class="sidebar-section">
         <div class="sidebar-label">Seek Wisdom From</div>
-        <button class="doctor-btn active" data-doctor="all" onclick="setDoctor(this)">
-          <span class="doctor-icon icon-all">✦</span>All Doctors
-        </button>
+        <div style="display: flex; gap: 6px; margin-bottom: 6px;">
+          <button class="doctor-btn active" data-doctor="all" onclick="setDoctor(this)" style="margin-bottom: 0; padding: 6px 8px; font-size: 11px; gap: 4px; flex: 1;">
+            <span class="doctor-icon icon-all" style="width: 18px; height: 18px; font-size: 9px;">✦</span>All Doctors
+          </button>
+          <button class="doctor-btn" id="sources-nav-btn" onclick="showPage('sources')" style="margin-bottom: 0; padding: 6px 8px; font-size: 11px; gap: 4px; flex: 1;">
+            <span class="doctor-icon icon-sources" style="width: 18px; height: 18px; font-size: 9px;">☩</span>Works Cited
+          </button>
+        </div>
         <button class="doctor-btn" data-doctor="sales" onclick="setDoctor(this)">
           <span class="doctor-icon icon-sales">FS</span>St. Francis de Sales
         </button>
@@ -901,9 +906,6 @@
         </button>
         <button class="doctor-btn" data-doctor="montfort" onclick="setDoctor(this)">
           <span class="doctor-icon icon-montfort">LM</span>St. Louis de Montfort
-        </button>
-        <button class="doctor-btn" id="sources-nav-btn" onclick="showPage('sources')">
-          <span class="doctor-icon icon-sources">☩</span>Works Cited
         </button>
         <button class="new-session-btn" onclick="newConversation()">+ New Conversation</button>
       </div>
