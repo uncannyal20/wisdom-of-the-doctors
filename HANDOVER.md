@@ -112,7 +112,7 @@ create table corpus (
 
 1.  **Google OAuth Login Welcome Gate:** Added full-screen welcome overlay `#login-overlay` that blocks guests and initializes Supabase Client safely with localized warning diagnostics.
 2.  **Symmetric Encryption Layer:** Built `api/crypto.js` to cryptographically secure session titles, message bodies, saved insights, and reflection summaries on the database.
-3.  **Collapsible Sidebar:** A border-aligned triangular toggle button collapses the sidebar to `0px` width smoothly on desktop and acts as an overlay drawer on mobile.
+3.  **Collapsible Sidebar:** A border-aligned triangular toggle button collapses the sidebar to `0px` width smoothly on desktop. On mobile, it is controlled by an elegant, vertically centered pull-handle (`▶` to open, `◀` to close) pinned directly to the left edge of the screen, removing header clutter and making drawer transitions highly intuitive.
 4.  **Journey Takeaway Summaries:** A "Summarize Journey" button located in the sidebar beneath the Saved Insights list triggers Claude via `api/summarize.js` to compile the chat logs and return a reflection card, which can be saved to Supabase (instantly cached for future views) and regenerated.
 5.  **Sidebar Past Conversations List:** Users can delete past chats directly by clicking a hover-triggered `×` delete button.
 6.  **Sidebar Saved Insights List:** Users can view saved insights in a scrollable list, delete them directly with a hover-triggered `×` delete button, or click to view the full text inside an overlay card.
