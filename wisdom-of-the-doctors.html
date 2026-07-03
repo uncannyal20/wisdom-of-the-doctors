@@ -2561,16 +2561,17 @@ function runReflectionTest() {
     }
   });
   
-  cachedSessions = originalSessions;
-  renderSessions(cachedSessions);
-  
   if (testItemFound && hasIcon) {
     console.log("✅ TEST PASSED: Reflection indicator (📜) renders correctly in the session list!");
-    alert("✅ TEST PASSED: Reflection indicator (📜) renders correctly in the session list!");
+    alert("✅ TEST PASSED: Reflection indicator (📜) renders correctly in the session list!\n\nLook at your sidebar—you will see a temporary session titled '✦ 📜 Test Reflection Session' to show you exactly where the indicator appears.");
   } else {
     console.error("❌ TEST FAILED: Test session was either not rendered, or missing the scroll icon.");
     alert("❌ TEST FAILED: Test session was either not rendered, or missing the scroll icon.");
   }
+
+  // Restore original state after alert is dismissed
+  cachedSessions = originalSessions;
+  renderSessions(cachedSessions);
 }
 
 // Init
