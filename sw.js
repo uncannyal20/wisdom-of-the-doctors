@@ -1,4 +1,4 @@
-const CACHE = 'wisdom-v15';
+const CACHE = 'wisdom-v16';
 const STATIC = [
   '/',
   '/wisdom-of-the-doctors.html',
