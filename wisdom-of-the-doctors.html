@@ -1047,7 +1047,7 @@
       Enter the interior castle. Sign in to ask questions, save your insights, and reflect on past conversations in complete privacy.
     </p>
 
-    <button class="new-session-btn" onclick="signInWithGoogle()" style="border-color: var(--gold); color: var(--gold); font-size: 12px; padding: 12px 24px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+    <button class="new-session-btn" onclick="signInWithGoogle()" style="font-size: 12px; padding: 12px 24px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
       <span style="font-size: 14px;">☩</span> Sign In with Google
     </button>
     
@@ -1161,7 +1161,7 @@
       
       <!-- SUMMARIZE JOURNEY IN SIDEBAR -->
       <div style="padding: 0 1rem 1rem 1rem;">
-        <button class="new-session-btn" id="summarize-btn" onclick="generateSummary()" style="border-color: var(--gold); color: var(--gold); width: 100%; margin-top: 1rem; display: none; padding: 8px 12px; font-size: 12px;">
+        <button class="new-session-btn" id="summarize-btn" onclick="generateSummary()" style="width: 100%; margin-top: 1rem; display: none; padding: 8px 12px; font-size: 12px;">
           ☩ Summarize Journey
         </button>
       </div>
@@ -1975,7 +1975,7 @@ function updateAuthUI(isLoggedIn) {
   } else {
     if (loginOverlay) loginOverlay.style.display = 'flex';
     authSection.innerHTML = `
-      <button class="new-session-btn" onclick="signInWithGoogle()" style="border-color: var(--gold); color: var(--gold); margin-top: 0;">
+      <button class="new-session-btn" onclick="signInWithGoogle()" style="margin-top: 0;">
         ☩ Sign In with Google
       </button>
     `;
@@ -1991,7 +1991,7 @@ function updateAuthUI(isLoggedIn) {
         loginTip.className = 'login-tip';
         loginTip.innerHTML = `
           <p style="margin-top: 1.5rem; color: var(--text-muted); font-size: 13px;">To ask questions and save your chats privately, please sign in.</p>
-          <button class="new-session-btn" onclick="signInWithGoogle()" style="border-color: var(--gold); color: var(--gold); width: auto; display: inline-block; padding: 8px 16px; margin-top: 10px;">
+          <button class="new-session-btn" onclick="signInWithGoogle()" style="width: auto; display: inline-block; padding: 8px 16px; margin-top: 10px;">
             ☩ Sign In with Google
           </button>
         `;
@@ -2574,10 +2574,10 @@ async function generateSummary() {
       </h2>
       <div class="reflection-body">${parseMarkdown(data.summary)}</div>
       <div style="display: flex; justify-content: center; margin-top: 1.5rem; gap: 12px;">
-        <button class="new-session-btn" id="save-reflection-btn" onclick="saveReflection()" style="width: auto; padding: 6px 16px; border-color: var(--gold); color: var(--gold); font-size: 11px;">
+        <button class="new-session-btn" id="save-reflection-btn" onclick="saveReflection()" style="width: auto; padding: 6px 16px; font-size: 11px;">
           ✦ Save Reflection
         </button>
-        <button class="new-session-btn" onclick="closeSummaryModal()" style="width: auto; padding: 6px 20px; border-color: var(--gold-dim); color: var(--gold-dim); font-size: 11px;">
+        <button class="new-session-btn" onclick="closeSummaryModal()" style="width: auto; padding: 6px 20px; font-size: 11px;">
           Amen
         </button>
       </div>
