@@ -1,4 +1,4 @@
-const CACHE = 'wisdom-v5';
+const CACHE = 'wisdom-v6';
 const STATIC = ['/', '/wisdom-of-the-doctors.html'];
 
 self.addEventListener('install', e => {
