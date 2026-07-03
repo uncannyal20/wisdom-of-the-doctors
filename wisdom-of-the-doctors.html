@@ -2017,12 +2017,29 @@ async function saveMessage(role, content) {
   } catch (e) { /* silent */ }
 }
 
+const WELCOME_QUOTES = [
+  { text: "It was pride that changed angels into devils; it is humility that makes men as angels.", author: "St. Augustine" },
+  { text: "To fall in love with God is the greatest romance; to seek Him the greatest adventure; to find Him the greatest human achievement.", author: "St. Augustine" },
+  { text: "Let nothing disturb you, let nothing frighten you, all things are passing; God only is changeless.", author: "St. Teresa of Ávila" },
+  { text: "Humility is truth; for it is very true that we have nothing good of ourselves, but only misery and nothingness.", author: "St. Teresa of Ávila" },
+  { text: "Be who you are and be that well, so as to bring honor to the Master Craftsman whose handiwork you are.", author: "St. Francis de Sales" },
+  { text: "Have patience with all things, but, first of all, with yourself.", author: "St. Francis de Sales" },
+  { text: "He who desires nothing but God is rich and happy; he who desires anything else is poor and miserable.", author: "St. Alphonsus Liguori" },
+  { text: "The only way to be happy in this life is to conform our will to the will of God in all things.", author: "St. Alphonsus Liguori" },
+  { text: "The search for Divine Wisdom is the most honorable, the most useful, and the most pleasant pursuit in the world.", author: "St. Louis de Montfort" },
+  { text: "God resists the proud, but gives grace to the humble. If you humble yourself, God will elevate you.", author: "St. Louis de Montfort" }
+];
+
 function newConversation() {
   showPage('chat');
   closeSidebar();
   currentSessionId = null;
   conversationHistory = [];
   document.getElementById('summarize-btn').style.display = 'none';
+  
+  const randomIdx = Math.floor(Math.random() * WELCOME_QUOTES.length);
+  const selectedQuote = WELCOME_QUOTES[randomIdx];
+  
   document.getElementById('chat-messages').innerHTML = `
     <div class="welcome-screen" id="welcome-screen">
       <svg class="welcome-rose" width="60" height="60" viewBox="0 0 60 60" fill="none">
@@ -2041,8 +2058,8 @@ function newConversation() {
         <circle cx="30" cy="30" r="12" stroke="#C9A84C" stroke-width="0.6" fill="none" opacity="0.4"/>
       </svg>
       <div class="welcome-title">Ask, and you shall receive</div>
-      <p class="welcome-quote">"Be who you are and be that well."</p>
-      <p class="welcome-attr">— St. Francis de Sales</p>
+      <p class="welcome-quote">"${selectedQuote.text}"</p>
+      <p class="welcome-attr">— ${selectedQuote.author}</p>
       <div class="prompt-chips">
         <button class="chip" onclick="sendChip(this)">How do I overcome anxiety and worry?</button>
         <button class="chip" onclick="sendChip(this)">What does it mean to love God?</button>
@@ -2517,6 +2534,15 @@ document.documentElement.style.setProperty('--font-scale', savedScale);
 renderSaved();
 initAuth();
 loadDoctorImages();
+
+const randomIdx = Math.floor(Math.random() * WELCOME_QUOTES.length);
+const selectedQuote = WELCOME_QUOTES[randomIdx];
+const quoteEl = document.querySelector('#welcome-screen .welcome-quote');
+const attrEl = document.querySelector('#welcome-screen .welcome-attr');
+if (quoteEl && attrEl) {
+  quoteEl.textContent = `"${selectedQuote.text}"`;
+  attrEl.textContent = `— ${selectedQuote.author}`;
+}
 
 const initialHash = window.location.hash;
 if (initialHash === '#/sources') {
