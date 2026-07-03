@@ -1725,23 +1725,23 @@ function makeDraggable(el, handle) {
 
 function showHeader() {
   const header = document.querySelector('.app-header');
-  if (header) {
+  if (header && header.classList.contains('hidden')) {
     header.classList.remove('hidden');
-  }
-  const triggerZone = document.getElementById('header-trigger-zone');
-  if (triggerZone) {
-    triggerZone.style.display = 'none';
+    const triggerZone = document.getElementById('header-trigger-zone');
+    if (triggerZone) {
+      triggerZone.style.display = 'none';
+    }
   }
 }
 
 function hideHeader() {
   const header = document.querySelector('.app-header');
-  if (header) {
+  if (header && !header.classList.contains('hidden')) {
     header.classList.add('hidden');
-  }
-  const triggerZone = document.getElementById('header-trigger-zone');
-  if (triggerZone) {
-    triggerZone.style.display = 'block';
+    const triggerZone = document.getElementById('header-trigger-zone');
+    if (triggerZone) {
+      triggerZone.style.display = 'block';
+    }
   }
 }
 
@@ -1772,6 +1772,7 @@ function handleKey(e) {
 }
 
 function sendChip(btn) {
+  hideWelcome();
   document.getElementById('chat-input').value = btn.textContent;
   sendMessage();
 }
@@ -1783,6 +1784,13 @@ function hideWelcome() {
 
 function scrollToBottom() {
   const c = document.getElementById('chat-messages');
+  if (!c) return;
+  // If the welcome screen is still visible, do not auto-scroll to the bottom.
+  // This keeps the landing page header and rose aligned at the top on load.
+  if (document.getElementById('welcome-screen')) {
+    c.scrollTop = 0;
+    return;
+  }
   c.scrollTop = c.scrollHeight;
 }
 
