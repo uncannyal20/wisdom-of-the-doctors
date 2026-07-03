@@ -1257,8 +1257,8 @@ const DOCTOR_PROFILES_DATA = {
   benedict: {
     name: "St. Benedict of Nursia",
     title: "Father of Western Monasticism (480–547)",
-    tag: "Doctor of the Church",
-    blurb: "The founder of Western monastic life. Seeing the collapse of the Roman Empire, Benedict founded monasteries and wrote his famous <em>Rule of Saint Benedict</em>, which balanced prayer and physical labor (<em>ora et labora</em>), community living, and hospitality. This stable monastic framework preserved Christian culture and learning for centuries."
+    tag: "Close Friend of the Doctors",
+    blurb: "<em>Not officially a Doctor of the Church, but a legendary \"close friend of the Doctors.\"</em> The founder of Western monastic life. Seeing the collapse of the Roman Empire, Benedict founded monasteries and wrote his famous <em>Rule of Saint Benedict</em>, balancing prayer, physical labor, community, and hospitality. He was too busy saving Western civilization and establishing monasteries to write academic treatises, but the Doctors read his Rule constantly."
   },
   more: {
     name: "St. Thomas More",
@@ -1332,7 +1332,7 @@ function renderDoctorProfiles() {
   Object.keys(DOCTOR_PROFILES_DATA).forEach(key => {
     const doc = DOCTOR_PROFILES_DATA[key];
     const imgUrl = doctorImages[key] || '';
-    const isFriend = key === 'more' || key === 'montfort';
+    const isFriend = key === 'more' || key === 'montfort' || key === 'benedict';
     const tagClass = isFriend ? 'doctor-profile-tag friend' : 'doctor-profile-tag';
     
     html += `
