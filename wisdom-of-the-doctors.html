@@ -22,6 +22,7 @@
     --gold-dim: #8B6A2E;
     --walnut: #2A1D12;
     --walnut-mid: #3D2B1F;
+    --walnut-light: #4D3B2F;
     --earth: #6B3E26;
     --earth-dim: #4A2B1A;
     --parchment: #EDD9B0;
@@ -33,6 +34,21 @@
     --fs-input: calc(16px * var(--font-scale));
     --fs-blurb: calc(15px * var(--font-scale));
     --fs-modal: calc(16px * var(--font-scale));
+  }
+
+  :root.light-theme {
+    --ink: #FAF6EE;
+    --vellum: #2D1C10;
+    --vellum-dim: #4E3825;
+    --gold: #A57E24;
+    --gold-dim: #D1B36E;
+    --walnut: #F3EBDD;
+    --walnut-mid: #E7DBCA;
+    --walnut-light: #DACBB7;
+    --earth: #A67049;
+    --earth-dim: #F3EBDD;
+    --parchment: #2D1C10;
+    --text-muted: #7E634B;
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { height: 100%; overflow: hidden; }
@@ -172,7 +188,7 @@
   }
   .sidebar-section {
     padding: 1rem;
-    border-bottom: 1px solid #3D2B1F;
+    border-bottom: 1px solid var(--walnut-mid);
   }
   .sidebar-label {
     font-family: 'Cinzel', serif;
@@ -471,7 +487,7 @@
   }
   .msg.ai .msg-bubble {
     background: var(--walnut-mid);
-    border: 1px solid #4D3B2F;
+    border: 1px solid var(--walnut-light);
     color: var(--vellum);
   }
   .msg-bubble p { margin-bottom: 0.75em; }
@@ -513,7 +529,7 @@
     font-size: 0.8em;
     color: #A0907A;
     margin-top: 1em;
-    border-top: 1px solid #3D2B1F;
+    border-top: 1px solid var(--walnut-mid);
     padding-top: 0.5em;
   }
   .citation-label {
@@ -976,8 +992,10 @@
     <button class="font-scale-btn" onclick="changeFontSize(1)" title="Increase Font Size">A+</button>
     <span style="height: 1px; width: 14px; background: var(--gold-dim); margin: 2px 0;"></span>
     <button class="font-scale-btn" onclick="changeFontSize(-1)" title="Decrease Font Size">A-</button>
+    <span style="height: 1px; width: 14px; background: var(--gold-dim); margin: 2px 0;"></span>
+    <button class="font-scale-btn" onclick="toggleTheme()" title="Toggle Light/Dark Theme" style="font-size: 11px; display: flex; align-items: center; justify-content: center;">🌓</button>
   </div>
-  <button class="font-toggle-btn" onclick="toggleFontPanel(event)" title="Adjust Text Size">A</button>
+  <button class="font-toggle-btn" id="font-toggle-btn" title="Adjust Text & Theme">A</button>
 </div>
 
 <!-- FULLSCREEN LOGIN OVERLAY -->
@@ -1117,7 +1135,7 @@
         </div>
       </div>
 
-      <div class="saved-list" style="margin-top: 1.5rem; border-top: 1px solid #3D2B1F; padding-top: 1rem;">
+      <div class="saved-list" style="margin-top: 1.5rem; border-top: 1px solid var(--walnut-mid); padding-top: 1rem;">
         <div class="saved-label">Saved Insights</div>
         <div id="insights-container">
           <p class="saved-empty">Saved insights will appear here.</p>
@@ -1584,6 +1602,103 @@ function clearFontPanelTimer() {
   if (fontPanelTimer) {
     clearTimeout(fontPanelTimer);
     fontPanelTimer = null;
+  }
+}
+
+function toggleTheme() {
+  const isLight = document.documentElement.classList.toggle('light-theme');
+  localStorage.setItem('theme', isLight ? 'light' : 'dark');
+  resetFontPanelTimer();
+}
+
+function makeDraggable(el, handle) {
+  let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+  let dragDistance = 0;
+  
+  handle.onmousedown = dragMouseDown;
+  handle.ontouchstart = dragTouchStart;
+  
+  function dragMouseDown(e) {
+    e = e || window.event;
+    e.preventDefault();
+    dragDistance = 0;
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+    document.onmouseup = closeDragElement;
+    document.onmousemove = elementDrag;
+  }
+  
+  function dragTouchStart(e) {
+    dragDistance = 0;
+    pos3 = e.touches[0].clientX;
+    pos4 = e.touches[0].clientY;
+    document.ontouchend = closeDragElement;
+    document.ontouchmove = elementTouchDrag;
+  }
+  
+  function elementDrag(e) {
+    e = e || window.event;
+    e.preventDefault();
+    pos1 = pos3 - e.clientX;
+    pos2 = pos4 - e.clientY;
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+    dragDistance += Math.abs(pos1) + Math.abs(pos2);
+    
+    let newTop = el.offsetTop - pos2;
+    let newLeft = el.offsetLeft - pos1;
+    
+    const margin = 10;
+    newTop = Math.max(margin, Math.min(window.innerHeight - el.offsetHeight - margin, newTop));
+    newLeft = Math.max(margin, Math.min(window.innerWidth - el.offsetWidth - margin, newLeft));
+    
+    el.style.top = newTop + "px";
+    el.style.left = newLeft + "px";
+    el.style.bottom = "auto";
+    el.style.right = "auto";
+  }
+  
+  function elementTouchDrag(e) {
+    pos1 = pos3 - e.touches[0].clientX;
+    pos2 = pos4 - e.touches[0].clientY;
+    pos3 = e.touches[0].clientX;
+    pos4 = e.touches[0].clientY;
+    dragDistance += Math.abs(pos1) + Math.abs(pos2);
+    
+    let newTop = el.offsetTop - pos2;
+    let newLeft = el.offsetLeft - pos1;
+    
+    const margin = 10;
+    newTop = Math.max(margin, Math.min(window.innerHeight - el.offsetHeight - margin, newTop));
+    newLeft = Math.max(margin, Math.min(window.innerWidth - el.offsetWidth - margin, newLeft));
+    
+    el.style.top = newTop + "px";
+    el.style.left = newLeft + "px";
+    el.style.bottom = "auto";
+    el.style.right = "auto";
+  }
+  
+  function closeDragElement(e) {
+    document.onmouseup = null;
+    document.onmousemove = null;
+    document.ontouchend = null;
+    document.ontouchmove = null;
+    
+    localStorage.setItem('font-panel-top', el.style.top);
+    localStorage.setItem('font-panel-left', el.style.left);
+    
+    if (dragDistance < 8) {
+      toggleFontPanel(e);
+    }
+  }
+  
+  const savedTop = localStorage.getItem('font-panel-top');
+  const savedLeft = localStorage.getItem('font-panel-left');
+  if (savedTop && savedLeft) {
+    el.style.top = savedTop;
+    el.style.left = savedLeft;
+    el.style.bottom = "auto";
+    el.style.right = "auto";
   }
 }
 
@@ -2579,9 +2694,23 @@ function runReflectionTest() {
 // Init
 const savedScale = localStorage.getItem('font-scale') || '1.05';
 document.documentElement.style.setProperty('--font-scale', savedScale);
+
+// Load saved theme
+const savedTheme = localStorage.getItem('theme');
+if (savedTheme === 'light') {
+  document.documentElement.classList.add('light-theme');
+}
+
 renderSaved();
 initAuth();
 loadDoctorImages();
+
+// Setup Draggable Font Panel
+const fontPanel = document.getElementById('font-floating-panel');
+const fontHandle = document.getElementById('font-toggle-btn');
+if (fontPanel && fontHandle) {
+  makeDraggable(fontPanel, fontHandle);
+}
 
 const randomIdx = Math.floor(Math.random() * WELCOME_QUOTES.length);
 const selectedQuote = WELCOME_QUOTES[randomIdx];
