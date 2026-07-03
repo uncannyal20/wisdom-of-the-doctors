@@ -103,14 +103,20 @@
     border-right: 1px solid var(--gold-dim);
     display: flex;
     flex-direction: column;
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: var(--gold-dim) transparent;
+    overflow: hidden;
     transition: width 0.25s ease, border-right-color 0.25s ease;
   }
-  .sidebar::-webkit-scrollbar { width: 4px; }
-  .sidebar::-webkit-scrollbar-track { background: transparent; }
-  .sidebar::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 2px; }
+  .sidebar-content {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    scrollbar-width: thin;
+    scrollbar-color: var(--gold-dim) transparent;
+  }
+  .sidebar-content::-webkit-scrollbar { width: 4px; }
+  .sidebar-content::-webkit-scrollbar-track { background: transparent; }
+  .sidebar-content::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 2px; }
   .sidebar.collapsed {
     width: 0;
     border-right-color: transparent;
@@ -863,61 +869,63 @@
 
   <!-- SIDEBAR -->
   <aside class="sidebar">
-    <div class="sidebar-section">
-      <div class="sidebar-label">Seek Wisdom From</div>
-      <button class="doctor-btn active" data-doctor="all" onclick="setDoctor(this)">
-        <span class="doctor-icon icon-all">✦</span>All Doctors
-      </button>
-      <button class="doctor-btn" data-doctor="sales" onclick="setDoctor(this)">
-        <span class="doctor-icon icon-sales">FS</span>St. Francis de Sales
-      </button>
-      <button class="doctor-btn" data-doctor="augustine" onclick="setDoctor(this)">
-        <span class="doctor-icon icon-aug">SA</span>St. Augustine
-      </button>
-      <button class="doctor-btn" data-doctor="therese" onclick="setDoctor(this)">
-        <span class="doctor-icon icon-therese">ST</span>St. Thérèse of Lisieux
-      </button>
-      <button class="doctor-btn" data-doctor="aquinas" onclick="setDoctor(this)">
-        <span class="doctor-icon icon-aquinas">TA</span>St. Thomas Aquinas
-      </button>
-      <button class="doctor-btn" data-doctor="liguori" onclick="setDoctor(this)">
-        <span class="doctor-icon icon-liguori">AL</span>St. Alphonsus Liguori
-      </button>
-      <button class="doctor-btn" data-doctor="benedict" onclick="setDoctor(this)">
-        <span class="doctor-icon icon-benedict">SB</span>St. Benedict
-      </button>
-      <button class="doctor-btn" data-doctor="more" onclick="setDoctor(this)">
-        <span class="doctor-icon icon-more">TM</span>St. Thomas More
-      </button>
-      <button class="doctor-btn" data-doctor="teresa" onclick="setDoctor(this)">
-        <span class="doctor-icon icon-teresa">TA</span>St. Teresa of Ávila
-      </button>
-      <button class="doctor-btn" data-doctor="montfort" onclick="setDoctor(this)">
-        <span class="doctor-icon icon-montfort">LM</span>St. Louis de Montfort
-      </button>
-      <button class="doctor-btn" id="sources-nav-btn" onclick="showPage('sources')">
-        <span class="doctor-icon icon-sources">☩</span>Works Cited
-      </button>
-      <button class="new-session-btn" onclick="newConversation()">+ New Conversation</button>
+    <div class="sidebar-content">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Seek Wisdom From</div>
+        <button class="doctor-btn active" data-doctor="all" onclick="setDoctor(this)">
+          <span class="doctor-icon icon-all">✦</span>All Doctors
+        </button>
+        <button class="doctor-btn" data-doctor="sales" onclick="setDoctor(this)">
+          <span class="doctor-icon icon-sales">FS</span>St. Francis de Sales
+        </button>
+        <button class="doctor-btn" data-doctor="augustine" onclick="setDoctor(this)">
+          <span class="doctor-icon icon-aug">SA</span>St. Augustine
+        </button>
+        <button class="doctor-btn" data-doctor="therese" onclick="setDoctor(this)">
+          <span class="doctor-icon icon-therese">ST</span>St. Thérèse of Lisieux
+        </button>
+        <button class="doctor-btn" data-doctor="aquinas" onclick="setDoctor(this)">
+          <span class="doctor-icon icon-aquinas">TA</span>St. Thomas Aquinas
+        </button>
+        <button class="doctor-btn" data-doctor="liguori" onclick="setDoctor(this)">
+          <span class="doctor-icon icon-liguori">AL</span>St. Alphonsus Liguori
+        </button>
+        <button class="doctor-btn" data-doctor="benedict" onclick="setDoctor(this)">
+          <span class="doctor-icon icon-benedict">SB</span>St. Benedict
+        </button>
+        <button class="doctor-btn" data-doctor="more" onclick="setDoctor(this)">
+          <span class="doctor-icon icon-more">TM</span>St. Thomas More
+        </button>
+        <button class="doctor-btn" data-doctor="teresa" onclick="setDoctor(this)">
+          <span class="doctor-icon icon-teresa">TA</span>St. Teresa of Ávila
+        </button>
+        <button class="doctor-btn" data-doctor="montfort" onclick="setDoctor(this)">
+          <span class="doctor-icon icon-montfort">LM</span>St. Louis de Montfort
+        </button>
+        <button class="doctor-btn" id="sources-nav-btn" onclick="showPage('sources')">
+          <span class="doctor-icon icon-sources">☩</span>Works Cited
+        </button>
+        <button class="new-session-btn" onclick="newConversation()">+ New Conversation</button>
+      </div>
+
+      <div class="saved-list">
+        <div class="saved-label">Past Sessions</div>
+        <div id="sessions-container">
+          <p class="saved-empty">Your conversations will appear here.</p>
+        </div>
+      </div>
+
+      <div class="saved-list" style="margin-top: 1.5rem; border-top: 1px solid #3D2B1F; padding-top: 1rem;">
+        <div class="saved-label">Saved Insights</div>
+        <div id="insights-container">
+          <p class="saved-empty">Saved insights will appear here.</p>
+        </div>
+      </div>
     </div>
 
-    <!-- AUTH SECTION -->
-    <div class="sidebar-section" id="auth-section" style="border-top: 1px solid var(--gold-dim); padding-top: 12px; margin-top: 12px; display: flex; flex-direction: column; gap: 8px;">
+    <!-- AUTH SECTION (Pinned to the bottom) -->
+    <div class="sidebar-section" id="auth-section" style="border-top: 1px solid var(--gold-dim); padding: 12px 1rem; display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; background: var(--walnut);">
       <!-- Dynamically populated -->
-    </div>
-
-    <div class="saved-list">
-      <div class="saved-label">Past Sessions</div>
-      <div id="sessions-container">
-        <p class="saved-empty">Your conversations will appear here.</p>
-      </div>
-    </div>
-
-    <div class="saved-list" style="margin-top: 1.5rem; border-top: 1px solid #3D2B1F; padding-top: 1rem;">
-      <div class="saved-label">Saved Insights</div>
-      <div id="insights-container">
-        <p class="saved-empty">Saved insights will appear here.</p>
-      </div>
     </div>
   </aside>
 
