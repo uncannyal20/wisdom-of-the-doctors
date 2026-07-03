@@ -121,6 +121,7 @@ create table corpus (
 9.  **Universal Hash-Based SPA Routing & Back Swipe:** Migrated client transitions (`sources`, `doctors`, `menu` drawer, and summary modals) to URL hashes (`#/sources`, `#/doctors`, `#/menu`, `#/modal`). Swiping right or pressing back on mobile devices natively dismisses overlays or returns users to the primary chat panel.
 10. **Scrollable Header Auto-Hide:** Implemented scroll-spy on the chat feed to automatically slide the top header out of layout (via `-60px` margins) when scrolling down, and instantly restore it when scrolling up or tapping a 12px touch handle at the top edge.
 11. **Complete Corpus RAG Ingestion & Database RLS Lockdown:** Uploaded all seed files (36 seed passages + 6 custom files) in `corpus/` with Gemini embeddings, then locked down the Supabase `corpus` table with a public read-only RLS policy.
+12. **Installable PWA Support (Chrome/Safari):** Configured full Web App Manifest, registered a standard Service Worker with offline assets caching, and generated high-resolution 192x192 and 512x512 PNG icons from the original SVG vector to trigger native mobile install prompts (e.g. Chrome's "Add to Home Screen").
 
 ---
 
