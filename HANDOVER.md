@@ -112,16 +112,20 @@ create table corpus (
 
 1.  **Google OAuth Login Welcome Gate:** Added full-screen welcome overlay `#login-overlay` that blocks guests and initializes Supabase Client safely with localized warning diagnostics.
 2.  **Symmetric Encryption Layer:** Built `api/crypto.js` to cryptographically secure session titles, message bodies, saved insights, and reflection summaries on the database.
-3.  **Collapsible Sidebar:** A border-aligned triangular toggle button collapses the sidebar to `0px` width smoothly on desktop and acts as a overlay drawer on mobile.
-4.  **Journey Takeaway Summaries:** A "Summarize Journey" button queries Claude via `api/summarize.js` to compile the chat logs and return a reflection card, which can be saved to Supabase (instantly cached for future views) and regenerated if needed.
+3.  **Collapsible Sidebar:** A border-aligned triangular toggle button collapses the sidebar to `0px` width smoothly on desktop and acts as an overlay drawer on mobile.
+4.  **Journey Takeaway Summaries:** A "Summarize Journey" button located in the sidebar beneath the Saved Insights list triggers Claude via `api/summarize.js` to compile the chat logs and return a reflection card, which can be saved to Supabase (instantly cached for future views) and regenerated.
 5.  **Sidebar Past Conversations List:** Users can delete past chats directly by clicking a hover-triggered `×` delete button.
 6.  **Sidebar Saved Insights List:** Users can view saved insights in a scrollable list, delete them directly with a hover-triggered `×` delete button, or click to view the full text inside an overlay card.
+7.  **Doctor Profiles Page ("Doctor Who?"):** Integrates a dynamic profile explorer screen displaying saints' biographies, custom tags (`Doctor of the Church` vs. `Close Friend of the Doctors`), and dynamic photo queries matching Wikipedia's PageImages API at launch.
+8.  **Font Sizing & Scale Accessibility:** Added header scaling buttons (`A-` / `A+`) to scale primary layout components (chat, input, modals) dynamically between `80%` and `160%`, persisting selected configurations to `localStorage`.
+9.  **Universal Hash-Based SPA Routing & Back Swipe:** Migrated client transitions (`sources`, `doctors`, `menu` drawer, and summary modals) to URL hashes (`#/sources`, `#/doctors`, `#/menu`, `#/modal`). Swiping right or pressing back on mobile devices natively dismisses overlays or returns users to the primary chat panel.
+10. **Scrollable Header Auto-Hide:** Implemented scroll-spy on the chat feed to automatically slide the top header out of layout (via `-60px` margins) when scrolling down, and instantly restore it when scrolling up or tapping a 12px touch handle at the top edge.
+11. **Complete Corpus RAG Ingestion & Database RLS Lockdown:** Uploaded all seed files (36 seed passages + 6 custom files) in `corpus/` with Gemini embeddings, then locked down the Supabase `corpus` table with a public read-only RLS policy.
 
 ---
 
 ## Future Scope / Scaling
 
 *   **Corpus Expansion:** Ingest more of the 34 remaining Doctors of the Church into the Supabase `corpus` table.
-*   **Doctor profile pages:** Add biographies, historical timelines, and profiles of key theological works.
 *   **Suggested follow-up questions:** Generate dynamic spiritual reflection prompts based on the current context.
 *   **Daily Devotion Push:** Add a daily passage generator providing a reflection card every morning.
