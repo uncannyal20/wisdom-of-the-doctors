@@ -683,6 +683,82 @@
   .sources-container::-webkit-scrollbar { width: 5px; }
   .sources-container::-webkit-scrollbar-track { background: transparent; }
   .sources-container::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 2px; }
+
+  /* === DOCTOR PROFILES CSS === */
+  #sources-nav-btn.active, #doctor-who-btn.active {
+    background: var(--walnut-mid) !important;
+    border-color: var(--gold) !important;
+    color: var(--gold) !important;
+  }
+  .doctor-profile-card {
+    background: var(--walnut);
+    border: 1px solid var(--walnut-mid);
+    border-left: 2px solid var(--gold-dim);
+    padding: 1.25rem;
+    border-radius: 6px;
+    display: flex;
+    gap: 1.25rem;
+    align-items: flex-start;
+  }
+  @media (max-width: 600px) {
+    .doctor-profile-card {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+  }
+  .doctor-profile-img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 2px solid var(--gold-dim);
+    object-fit: cover;
+    flex-shrink: 0;
+    background: var(--walnut-mid);
+  }
+  .doctor-profile-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    flex: 1;
+  }
+  .doctor-profile-name {
+    font-family: 'Cinzel', serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--gold);
+    letter-spacing: 0.05em;
+  }
+  .doctor-profile-title {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+  }
+  .doctor-profile-blurb {
+    font-size: 14.5px;
+    line-height: 1.6;
+    color: var(--vellum-dim);
+    font-family: 'EB Garamond', Georgia, serif;
+    margin-top: 0.5rem;
+  }
+  .doctor-profile-tag {
+    display: inline-block;
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    color: var(--gold);
+    background: rgba(201, 168, 76, 0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid rgba(201, 168, 76, 0.3);
+    width: fit-content;
+    margin-top: 0.25rem;
+  }
+  .doctor-profile-tag.friend {
+    color: #a9cbf5;
+    background: rgba(169, 203, 245, 0.1);
+    border-color: rgba(169, 203, 245, 0.3);
+  }
   
   .sources-title {
     font-family: 'Cinzel', serif;
@@ -843,7 +919,10 @@
     <button class="new-session-btn" id="summarize-btn" onclick="generateSummary()" style="margin-top: 0; padding: 4px 8px; font-size: 10px; display: none; margin-right: 8px; border-color: var(--gold); color: var(--gold);">
       ☩ Summarize Journey
     </button>
-    <span id="mode-label" class="doctor-badge">All Doctors</span>
+    <button id="doctor-who-btn" onclick="showPage('doctors')" style="background: transparent; border: 1px solid var(--gold-dim); color: var(--gold); padding: 4px 8px; font-size: 10px; border-radius: 4px; font-family: 'Cinzel', serif; letter-spacing: 0.05em; cursor: pointer; transition: all 0.15s; margin-right: 8px; height: fit-content; display: inline-flex; align-items: center; margin-top: 0;">
+      ☩ Doctor Who?
+    </button>
+    <span id="mode-label" style="display: none;">All Doctors</span>
     <button id="sources-nav-btn" onclick="showPage('sources')" style="background: transparent; border: 1px solid var(--gold-dim); color: var(--gold); padding: 4px 8px; font-size: 10px; border-radius: 4px; font-family: 'Cinzel', serif; letter-spacing: 0.05em; cursor: pointer; transition: all 0.15s; margin-left: 8px; margin-top: 0; height: fit-content; display: inline-flex; align-items: center;">
       ☩ Works Cited
     </button>
@@ -1095,6 +1174,16 @@
 
     </div>
   </div>
+
+  <!-- DOCTOR PROFILES -->
+  <div class="sources-area" id="doctors-area">
+    <div class="sources-container">
+      <h2 class="sources-title">Doctor Who? ☩ Profiles</h2>
+      <div id="doctor-profiles-grid" style="display: flex; flex-direction: column; gap: 1.5rem;">
+        <!-- Dynamically populated -->
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -1120,18 +1209,172 @@ const DOCTOR_LABELS = {
   montfort: 'St. Louis de Montfort'
 };
 
+// === WIKI PAGES FOR PROFILE PICTURES ===
+const WIKI_PAGES = {
+  sales: "Francis de Sales",
+  augustine: "Augustine of Hippo",
+  therese: "Thérèse of Lisieux",
+  aquinas: "Thomas Aquinas",
+  liguori: "Alphonsus Liguori",
+  benedict: "Benedict of Nursia",
+  more: "Thomas More",
+  teresa: "Teresa of Ávila",
+  montfort: "Louis de Montfort"
+};
+
+// === DOCTOR PROFILES DATA ===
+const DOCTOR_PROFILES_DATA = {
+  sales: {
+    name: "St. Francis de Sales",
+    title: "Doctor of Devotion (1567–1622)",
+    tag: "Doctor of the Church",
+    blurb: "Known for his deep wisdom and gentle approach to spiritual direction. He famously taught that holiness and devotion are possible for people in all walks of life, from courts and shops to fields and families, not just inside monasteries. His work <em>Introduction to the Devout Life</em> remains one of the most accessible guides to prayer and everyday holiness."
+  },
+  augustine: {
+    name: "St. Augustine of Hippo",
+    title: "Doctor of Grace (354–430)",
+    tag: "Doctor of the Church",
+    blurb: "One of the most brilliant and influential theologians of the early Church. A philosopher, bishop, and rhetorician, Augustine's works shaped Western theology. His autobiographical <em>Confessions</em> describes a restless youth, a profound intellectual struggle, and an ultimate, dramatic conversion. He famously wrote: <em>\"Our hearts are restless, O Lord, until they rest in You.\"</em>"
+  },
+  therese: {
+    name: "St. Thérèse of Lisieux",
+    title: "Doctor of the Little Way (1873–1897)",
+    tag: "Doctor of the Church",
+    blurb: "A Carmelite nun who died at the young age of 24, Thérèse is beloved for her \"Little Way\"—a path of spiritual childhood that emphasizes doing ordinary, daily actions with extraordinary, child-like love and trust in God. Her autobiography, <em>Story of a Soul</em>, has inspired millions to seek holiness through small deeds of charity and surrender."
+  },
+  aquinas: {
+    name: "St. Thomas Aquinas",
+    title: "Doctor Angelicus (1225–1274)",
+    tag: "Doctor of the Church",
+    blurb: "A Dominican friar and the intellectual powerhouse of the Church. Thomas synthesized the philosophy of Aristotle with Christian theology to create a coherent, monumental intellectual system. His masterpiece, the <em>Summa Theologiae</em>, is a cornerstone of theology, combining rigorous logic with deep, mystical devotion to the Eucharist."
+  },
+  liguori: {
+    name: "St. Alphonsus Liguori",
+    title: "Doctor Zelantissimus (1696–1787)",
+    tag: "Doctor of the Church",
+    blurb: "A lawyer turned bishop, missionary, and founder of the Redemptorists. Alphonsus is the patron saint of moral theologians. He advocated for a compassionate, pastoral approach to moral questions, avoiding both excessive severity and laxity. He was a prolific writer, spreading deep devotion to Mary and the Blessed Sacrament."
+  },
+  benedict: {
+    name: "St. Benedict of Nursia",
+    title: "Father of Western Monasticism (480–547)",
+    tag: "Doctor of the Church",
+    blurb: "The founder of Western monastic life. Seeing the collapse of the Roman Empire, Benedict founded monasteries and wrote his famous <em>Rule of Saint Benedict</em>, which balanced prayer and physical labor (<em>ora et labora</em>), community living, and hospitality. This stable monastic framework preserved Christian culture and learning for centuries."
+  },
+  more: {
+    name: "St. Thomas More",
+    title: "Doctor of Conscience (De Facto) (1478–1535)",
+    tag: "Close Friend of the Doctors",
+    blurb: "<em>Not officially a Doctor of the Church, but a very close friend of the Doctors.</em> Sir Thomas More was the Lord Chancellor of England, a brilliant humanist scholar, and a family man. He chose execution over compromising his conscience and refusing to recognize Henry VIII as supreme head of the Church of England. He went to the scaffold with humor and courage, declaring himself <em>\"the King's good servant, but God's first.\"</em>"
+  },
+  teresa: {
+    name: "St. Teresa of Ávila",
+    title: "Doctor of Prayer (1515–1582)",
+    tag: "Doctor of the Church",
+    blurb: "A Spanish Carmelite nun, mystic, and reformer who founded the Discalced Carmelites. Teresa was a master of deep interior prayer, describing the soul's journey through seven stages of spiritual growth in <em>The Interior Castle</em>. Her writings are noted for their high mystical heights combined with practical, down-to-earth wisdom."
+  },
+  montfort: {
+    name: "St. Louis de Montfort",
+    title: "Apostle of Mary (1673–1716)",
+    tag: "Close Friend of the Doctors",
+    blurb: "<em>Not officially a Doctor of the Church, but a passionate \"close friend of the Doctors\"</em> who spent his life preaching parish missions across rural France. Montfort brought the theology of Marian devotion to its absolute zenith. He is famous for <em>True Devotion to Mary</em>, teaching that the surest, easiest, and most perfect path to Jesus Christ is through total consecration to the Blessed Virgin."
+  }
+};
+
+let doctorImages = {};
+
+async function loadDoctorImages() {
+  // Initialize with fallback URLs immediately so we have images ready to show
+  const fallbacks = {
+    sales: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Fran%C3%A7ois_de_Sales.jpg/200px-Fran%C3%A7ois_de_Sales.jpg',
+    augustine: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Saint_Augustine_Portrait.jpg/200px-Saint_Augustine_Portrait.jpg',
+    therese: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f1/Th%C3%A9r%C3%A8se_de_Lisieux_in_1885.jpg/200px-Th%C3%A9r%C3%A8se_de_Lisieux_in_1885.jpg',
+    aquinas: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/St-thomas-aquinas.jpg/200px-St-thomas-aquinas.jpg',
+    liguori: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/St_Alphonsus_Liguori.jpg/200px-St_Alphonsus_Liguori.jpg',
+    benedict: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Benedict_of_Nursia.jpg/200px-Benedict_of_Nursia.jpg',
+    more: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Sir_Thomas_More.jpg/200px-Sir_Thomas_More.jpg',
+    teresa: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Teresa_of_%C3%81vila.jpg/200px-Teresa_of_%C3%81vila.jpg',
+    montfort: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Louis_de_Montfort.jpg/200px-Louis_de_Montfort.jpg'
+  };
+  
+  Object.keys(fallbacks).forEach(key => {
+    doctorImages[key] = fallbacks[key];
+  });
+  
+  renderDoctorProfiles();
+
+  // Try to load dynamic thumbnail images from Wikipedia API
+  const titles = Object.values(WIKI_PAGES).join('|');
+  const url = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(titles)}&prop=pageimages&format=json&pithumbsize=200&origin=*`;
+  
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    if (data.query && data.query.pages) {
+      const pages = Object.values(data.query.pages);
+      pages.forEach(p => {
+        const docId = Object.keys(WIKI_PAGES).find(key => WIKI_PAGES[key] === p.title);
+        if (docId && p.thumbnail && p.thumbnail.source) {
+          doctorImages[docId] = p.thumbnail.source;
+        }
+      });
+      renderDoctorProfiles();
+    }
+  } catch (e) {
+    console.warn("Could not fetch fresh images from Wikipedia API, using fallbacks:", e);
+  }
+}
+
+function renderDoctorProfiles() {
+  const container = document.getElementById('doctor-profiles-grid');
+  if (!container) return;
+  
+  let html = '';
+  Object.keys(DOCTOR_PROFILES_DATA).forEach(key => {
+    const doc = DOCTOR_PROFILES_DATA[key];
+    const imgUrl = doctorImages[key] || '';
+    const isFriend = key === 'more' || key === 'montfort';
+    const tagClass = isFriend ? 'doctor-profile-tag friend' : 'doctor-profile-tag';
+    
+    html += `
+      <div class="doctor-profile-card">
+        <img class="doctor-profile-img" src="${imgUrl}" alt="${doc.name}" onerror="this.style.display='none'">
+        <div class="doctor-profile-details">
+          <div class="doctor-profile-name">${doc.name}</div>
+          <div class="doctor-profile-title">${doc.title}</div>
+          <div class="${tagClass}">${doc.tag}</div>
+          <div class="doctor-profile-blurb">${doc.blurb}</div>
+        </div>
+      </div>
+    `;
+  });
+  
+  container.innerHTML = html;
+}
+
+
 
 // === UI HELPERS ===
 function showPage(page) {
   if (page === 'chat') {
     document.querySelector('.chat-area').style.display = 'flex';
     document.getElementById('sources-area').style.display = 'none';
+    document.getElementById('doctors-area').style.display = 'none';
     document.getElementById('sources-nav-btn').classList.remove('active');
+    document.getElementById('doctor-who-btn').classList.remove('active');
   } else if (page === 'sources') {
     document.querySelector('.chat-area').style.display = 'none';
     document.getElementById('sources-area').style.display = 'flex';
+    document.getElementById('doctors-area').style.display = 'none';
     document.querySelectorAll('.doctor-btn').forEach(b => b.classList.remove('active'));
     document.getElementById('sources-nav-btn').classList.add('active');
+    document.getElementById('doctor-who-btn').classList.remove('active');
+  } else if (page === 'doctors') {
+    document.querySelector('.chat-area').style.display = 'none';
+    document.getElementById('sources-area').style.display = 'none';
+    document.getElementById('doctors-area').style.display = 'flex';
+    document.querySelectorAll('.doctor-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('sources-nav-btn').classList.remove('active');
+    document.getElementById('doctor-who-btn').classList.add('active');
   }
 }
 
@@ -1141,7 +1384,8 @@ function setDoctor(btn) {
   btn.classList.add('active');
   currentDoctor = btn.dataset.doctor;
   const label = DOCTOR_LABELS[currentDoctor];
-  document.getElementById('mode-label').textContent = label;
+  const modeLabel = document.getElementById('mode-label');
+  if (modeLabel) modeLabel.textContent = label;
   document.getElementById('footer-badge').textContent = label;
   conversationHistory = []; // reset conversation when switching doctor
   currentSessionId = null;
@@ -1493,7 +1737,8 @@ async function loadSession(sessionId, doctor) {
       b.classList.toggle('active', b.dataset.doctor === doctor);
     });
     const label = DOCTOR_LABELS[doctor] || 'All Doctors';
-    document.getElementById('mode-label').textContent = label;
+    const modeLabel = document.getElementById('mode-label');
+    if (modeLabel) modeLabel.textContent = label;
     document.getElementById('footer-badge').textContent = label;
 
     // Re-render chat
@@ -1999,6 +2244,7 @@ function parseMarkdown(md) {
 // Init
 renderSaved();
 initAuth();
+loadDoctorImages();
 
 // Register service worker
 if ('serviceWorker' in navigator) {
