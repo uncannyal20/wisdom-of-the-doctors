@@ -887,6 +887,13 @@
     color: var(--vellum-dim);
     font-family: 'EB Garamond', Georgia, serif;
   }
+  .changelog-date {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.05em;
+    color: var(--gold-dim);
+    text-transform: uppercase;
+  }
   
   /* === MODAL STYLING === */
   .modal-card h3 {
@@ -1348,6 +1355,18 @@
       </div>
     </div>
   </div>
+
+  <!-- CHANGELOG (unlisted — reachable only via #/changelog) -->
+  <div class="sources-area" id="changelog-area">
+    <div class="sources-container">
+      <h2 class="sources-title">Changelog</h2>
+      <div class="doctor-sources-group">
+        <div id="changelog-list" style="display: flex; flex-direction: column; gap: 1rem;">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -1515,7 +1534,37 @@ function renderDoctorProfiles() {
   container.innerHTML = html;
 }
 
+// === CHANGELOG (unlisted page, reachable via #/changelog) ===
+const CHANGELOG_ENTRIES = [
+  { date: "2026-07-15", title: "Spiritual Profile Memory & Journey Continuity", blurb: "Introduced a per-user \"spiritual profile\" that's quietly folded and updated after each saved reflection, plus injection of recent session summaries as journey history. Both feed into every /api/query call so the guide responds with continuity across conversations without ever citing stored history explicitly." },
+  { date: "2026-07-03", title: "Light Parchment Theme Switcher", blurb: "Added a high-contrast light vellum theme with dark walnut-brown typography and soft sepia highlights, toggled from the draggable preferences panel and persisted to localStorage." },
+  { date: "2026-07-03", title: "Draggable Preference Panel", blurb: "Refactored the floating text-size panel into a draggable overlay bound to the viewport, so it can be repositioned anywhere without obstructing chat input." },
+  { date: "2026-07-03", title: "Randomized Saint Welcome Quotes", blurb: "Ten curated quotes from the Doctors of the Church now rotate on the landing screen at app startup and whenever a new conversation begins." },
+  { date: "2026-07-03", title: "Installable PWA Support", blurb: "Full Web App Manifest, service worker offline caching, and high-resolution icons enabling \"Add to Home Screen\" install prompts on Chrome and Safari." },
+  { date: "2026-07-02", title: "Complete Corpus RAG Ingestion & RLS Lockdown", blurb: "Uploaded all seed and custom corpus passages with Gemini embeddings, then locked the Supabase corpus table down to a public read-only RLS policy." },
+  { date: "2026-07-03", title: "Scrollable Header Auto-Hide", blurb: "Scroll-spy on the chat feed slides the header out of view when scrolling down and restores it on scroll-up or a top-edge tap." },
+  { date: "2026-07-03", title: "Universal Hash-Based SPA Routing & Back Swipe", blurb: "Migrated overlay transitions to URL hashes (#/sources, #/doctors, #/menu, #/modal) so mobile back-swipe and the browser back button dismiss panels naturally." },
+  { date: "2026-07-03", title: "Font Sizing & Scale Accessibility", blurb: "A floating side-panel with A+/A- controls scales layout text between 80% and 160%, auto-closing after inactivity and persisting the chosen size." },
+  { date: "2026-07-03", title: "Doctor Profiles Page (\"Doctor Who?\")", blurb: "A dynamic profile explorer showing each saint's biography, Doctor/Friend tag, and a portrait pulled live from Wikipedia's PageImages API." },
+  { date: "2026-07-03", title: "Sidebar Saved Insights List", blurb: "Saved insights render in a scrollable sidebar list with hover-to-delete and a full-text preview overlay on click." },
+  { date: "2026-07-03", title: "Sidebar Past Conversations List", blurb: "Past sessions are listed in the sidebar with hover-triggered delete, cascading to the database." },
+  { date: "2026-07-03", title: "Journey Takeaway Summaries", blurb: "A \"Summarize Journey\" action asks Claude to compile a chat log into a saved reflection card, marked with a gold scroll icon in the sidebar." },
+  { date: "2026-07-02", title: "Collapsible Sidebar", blurb: "A border-aligned toggle collapses the sidebar to 0px on desktop; a vertical pull-handle drives the same drawer on mobile." },
+  { date: "2026-07-02", title: "Symmetric Encryption Layer", blurb: "Added api/crypto.js (AES-256-CBC) to encrypt session titles, message bodies, saved insights, and reflection summaries at rest." },
+  { date: "2026-07-02", title: "Google OAuth Login Welcome Gate", blurb: "A full-screen welcome overlay gates guest access and initializes the Supabase client with localized diagnostics on failure." }
+];
 
+function renderChangelog() {
+  const container = document.getElementById('changelog-list');
+  if (!container) return;
+  container.innerHTML = CHANGELOG_ENTRIES.map(e => `
+    <div class="source-card">
+      <div class="changelog-date">${e.date}</div>
+      <div class="source-card-title">${e.title}</div>
+      <div class="source-card-blurb">${e.blurb}</div>
+    </div>
+  `).join('');
+}
 
 // === UI HELPERS ===
 function showPage(page, updateHash = true) {
@@ -1524,12 +1573,14 @@ function showPage(page, updateHash = true) {
     document.querySelector('.chat-area').style.display = 'flex';
     document.getElementById('sources-area').style.display = 'none';
     document.getElementById('doctors-area').style.display = 'none';
+    document.getElementById('changelog-area').style.display = 'none';
     document.getElementById('sources-nav-btn').classList.remove('active');
     document.getElementById('doctor-who-btn').classList.remove('active');
   } else if (page === 'sources') {
     document.querySelector('.chat-area').style.display = 'none';
     document.getElementById('sources-area').style.display = 'flex';
     document.getElementById('doctors-area').style.display = 'none';
+    document.getElementById('changelog-area').style.display = 'none';
     document.querySelectorAll('.doctor-btn').forEach(b => b.classList.remove('active'));
     document.getElementById('sources-nav-btn').classList.add('active');
     document.getElementById('doctor-who-btn').classList.remove('active');
@@ -1537,9 +1588,19 @@ function showPage(page, updateHash = true) {
     document.querySelector('.chat-area').style.display = 'none';
     document.getElementById('sources-area').style.display = 'none';
     document.getElementById('doctors-area').style.display = 'flex';
+    document.getElementById('changelog-area').style.display = 'none';
     document.querySelectorAll('.doctor-btn').forEach(b => b.classList.remove('active'));
     document.getElementById('sources-nav-btn').classList.remove('active');
     document.getElementById('doctor-who-btn').classList.add('active');
+  } else if (page === 'changelog') {
+    document.querySelector('.chat-area').style.display = 'none';
+    document.getElementById('sources-area').style.display = 'none';
+    document.getElementById('doctors-area').style.display = 'none';
+    document.getElementById('changelog-area').style.display = 'flex';
+    document.querySelectorAll('.doctor-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('sources-nav-btn').classList.remove('active');
+    document.getElementById('doctor-who-btn').classList.remove('active');
+    renderChangelog();
   }
 
   if (updateHash) {
@@ -1567,6 +1628,8 @@ window.addEventListener('hashchange', () => {
     showPage('sources', false);
   } else if (hash === '#/doctors') {
     showPage('doctors', false);
+  } else if (hash === '#/changelog') {
+    showPage('changelog', false);
   } else {
     showPage('chat', false);
   }
@@ -2804,6 +2867,8 @@ if (initialHash === '#/sources') {
   showPage('sources', false);
 } else if (initialHash === '#/doctors') {
   showPage('doctors', false);
+} else if (initialHash === '#/changelog') {
+  showPage('changelog', false);
 } else {
   showPage('chat', false);
 }
