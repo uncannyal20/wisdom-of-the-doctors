@@ -113,3 +113,24 @@ with check (auth.uid() = user_id);
 
 -- 4. Add summary column to sessions table
 alter table sessions add column if not exists summary text;
+
+-- =========================================================================
+-- === SPIRITUAL PROFILE TABLE (IN-MEMORY PAST-CONVERSATION RECALL) ===
+-- =========================================================================
+
+-- 1. Create spiritual_profiles table (one row per user)
+create table if not exists spiritual_profiles (
+  user_id uuid references auth.users(id) on delete cascade default auth.uid() primary key,
+  profile text, -- AES-256 encrypted
+  updated_at timestamp with time zone default now()
+);
+
+-- 2. Enable Row-Level Security (RLS) on spiritual_profiles table
+alter table spiritual_profiles enable row level security;
+
+-- 3. Create RLS Policy for spiritual_profiles
+create policy "Users can manage their own spiritual profile"
+on spiritual_profiles for all
+to authenticated
+using (auth.uid() = user_id)
+with check (auth.uid() = user_id);

@@ -8,7 +8,7 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { model, max_tokens, messages, doctor } = req.body;
+  const { model, max_tokens, messages, doctor, spiritual_profile, past_sessions_context } = req.body;
 
   if (!model || !messages) {
     return res.status(400).json({ error: 'Missing required fields: model, messages' });
@@ -125,11 +125,18 @@ ${focusInstruction}
 KNOWLEDGE BASE (these are the passages dynamically retrieved for this query — treat them as your primary sources):
 ${corpusText}
 
+SPIRITUAL PROFILE OF THIS SOUL (use only to inform tone and continuity — do not quote or reference it clinically):
+${spiritual_profile || '(no profile yet — treat this as an early relationship)'}
+
+HISTORY OF THE JOURNEY (past reflections from this soul's earlier conversations, most recent first — for continuity, not citation):
+${past_sessions_context || '(no prior journey recorded yet)'}
+
 Core Behavioral Rules:
 - Synthesize, Do Not List: You are a companion, not a search engine. Weave core truths from the provided passages into a single, seamless, and deeply personal reflection. Absolutely no bullet points, numbered lists, or bolded headers.
 - Embed the Wisdom: Naturally integrate brief, powerful excerpts from the retrieved passages into your reflection. Do not preface them with 'St. X said:'. Instead, let the wisdom flow as part of your own sentences. Use italics for the quotes (wrap them in single asterisks, e.g. *quote*) to distinguish them from your voice.
 - Voice & Tone: Write with the intimacy of a letter. Use a slow, rhythmic cadence. Use transitional phrases ('Consider,' 'In this light,' 'It is worth remembering...') to build a narrative arc.
 - Empathy First: Acknowledge the user's emotion or question directly before introducing wisdom.
+- Continuity, Not Callbacks: Let the spiritual profile and journey history shape your warmth and familiarity naturally. Never explicitly announce that you are drawing on stored history (e.g. no "I see from your profile that…" or "as you mentioned last time…") — the continuity should feel like memory, not record-keeping.
 - Formatting: Use standard paragraphs. Keep the body text clean and uninterrupted by references.
 
 Citation Policy:

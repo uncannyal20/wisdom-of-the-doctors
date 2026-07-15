@@ -1906,6 +1906,7 @@ async function deleteSavedInsight(idx, id) {
 let supabaseClient = null;
 let userToken = null;
 let currentUser = null;
+let spiritualProfile = null;
 
 async function initAuth() {
   try {
@@ -1938,9 +1939,11 @@ function handleSessionChange(session) {
     updateAuthUI(true);
     loadSessions();
     loadInsights();
+    loadSpiritualProfile();
   } else {
     userToken = null;
     currentUser = null;
+    spiritualProfile = null;
     updateAuthUI(false);
     document.getElementById('sessions-container').innerHTML = `
       <p class="saved-empty">Sign in to view past conversations.</p>
@@ -2025,6 +2028,33 @@ async function signInWithGoogle() {
 async function signOut() {
   if (!supabaseClient) return;
   await supabaseClient.auth.signOut();
+}
+
+// === SPIRITUAL PROFILE ===
+async function loadSpiritualProfile() {
+  if (!userToken) return;
+  try {
+    const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${userToken}` };
+    const res = await fetch('/api/profile', { headers });
+    if (!res.ok) return;
+    const data = await res.json();
+    spiritualProfile = data.profile || null;
+  } catch (e) { /* silent — profile is best-effort context */ }
+}
+
+async function updateSpiritualProfile(sessionSummary) {
+  if (!userToken || !sessionSummary) return;
+  try {
+    const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${userToken}` };
+    const res = await fetch('/api/profile', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ session_summary: sessionSummary })
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    spiritualProfile = data.profile || spiritualProfile;
+  } catch (e) { /* silent — profile update is best-effort */ }
 }
 
 // === SESSIONS ===
@@ -2441,6 +2471,12 @@ async function sendMessage() {
   let fullText = '';
 
   try {
+    const pastSessionsContext = cachedSessions
+      .filter(s => s.summary && s.id !== currentSessionId)
+      .slice(0, 6)
+      .map(s => `- (${s.doctor}) ${s.summary}`)
+      .join('\n');
+
     const response = await fetch('/api/query', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -2448,7 +2484,9 @@ async function sendMessage() {
         model: 'claude-sonnet-4-6',
         max_tokens: 1000,
         doctor: currentDoctor,
-        messages: conversationHistory
+        messages: conversationHistory,
+        spiritual_profile: spiritualProfile,
+        past_sessions_context: pastSessionsContext || null
       })
     });
 
@@ -2631,17 +2669,20 @@ async function saveReflection() {
       body: JSON.stringify({ summary: lastGeneratedSummary })
     });
     if (!res.ok) throw new Error("Failed to save summary");
-    
+
     // Update local cache
     const s = cachedSessions.find(x => x.id === currentSessionId);
     if (s) s.summary = lastGeneratedSummary;
-    
+
     // Re-render sidebar sessions to show the gold scroll icon (📜) immediately
     renderSessions(cachedSessions);
-    
+
     if (btn) {
       btn.textContent = "✦ Saved";
     }
+
+    // Fold this reflection into the long-term spiritual profile (best-effort, non-blocking)
+    updateSpiritualProfile(lastGeneratedSummary);
   } catch (e) {
     if (btn) {
       btn.disabled = false;
